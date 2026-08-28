@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matt Warner — Audio Designer</title>
+<meta name="description" content="Matt Warner — audio designer for video games. Sound design, implementation, and adaptive music.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<header class="hero" id="top">
+  <div class="hero__video-wrap" id="heroVideoWrap">
+    <video class="hero__video" autoplay muted loop playsinline preload="auto">
+      <source src="assets/video/hero-bg.webm" type="video/webm">
+      <!-- Optional fallback, uncomment and provide an mp4 if you want broader support:
+      <source src="assets/video/hero-bg.mp4" type="video/mp4"> -->
+    </video>
+    <div class="hero__scrim"></div>
+  </div>
+
+  <div class="hero__content">
+    <p class="hero__eyebrow">Sound for interactive media</p>
+    <h1 class="hero__name">Matt Warner</h1>
+    <p class="hero__role">Audio Designer</p>
+  </div>
+
+  <a class="hero__scrollcue" href="#work" aria-label="Scroll to work">
+    <span class="hero__scrollcue-line"></span>
+  </a>
+</header>
+
+<!-- ============================================================
+     SHOWCASE — Audio / Art tabs + project console
+     ============================================================ -->
+<main class="showcase" id="work" data-mode="audio">
+
+  <nav class="tabs" role="tablist" aria-label="Portfolio category">
+    <button class="tab is-active" role="tab" aria-selected="true" data-mode="audio" id="tabAudio">
+      <span class="tab__index">01</span> Audio
+    </button>
+    <button class="tab" role="tab" aria-selected="false" data-mode="art" id="tabArt">
+      <span class="tab__index">02</span> Art
+    </button>
+  </nav>
+
+  <div class="carousel">
+    <button class="carousel__arrow carousel__arrow--prev" type="button" disabled aria-label="Previous project">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="carousel__viewport">
+      <div class="carousel__track" id="carouselTrack">
+
+        <!-- ============ SLIDE 1 : RESULTARE ============ -->
+        <article class="slide" data-index="0">
+          <div class="console">
+
+            <div class="console__media">
+              <video class="console__video" muted loop playsinline preload="metadata" autoplay>
+                <source src="assets/video/resultare-trailer.webm" type="video/webm">
+              </video>
+              <span class="console__media-tag">Gameplay trailer</span>
+            </div>
+
+            <div class="console__body">
+              <h2 class="console__title">Resultare</h2>
+
+              <!-- ---------- AUDIO MODE CONTENT ---------- -->
+              <div class="mode-panel mode-panel--audio">
+                <p class="console__desc">Designed and implemented all audio from scratch using Wwise and Unity.</p>
+
+                <div class="music">
+                  <div class="music__head">
+                    <span class="music__label">Adaptive theme</span>
+                    <span class="music__readout" id="musicReadout">CALM · 0%</span>
+                  </div>
+
+                  <div class="fader">
+                    <span class="fader__end">Calm</span>
+                    <input type="range" class="fader__input" id="musicFader" min="0" max="100" value="0" step="1" aria-label="Crossfade the adaptive music between calm and intense states">
+                    <span class="fader__end">Intense</span>
+                  </div>
+
+                  <button class="music__play" id="musicPlay" type="button" aria-label="Play adaptive music">
+                    <svg class="icon-play" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="icon-pause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                    <span class="music__play-label">Play theme</span>
+                  </button>
+
+                  <!-- Layers are loaded and crossfaded by script.js. Replace src paths with your stems. -->
+                  <audio class="music__layer" data-label="Calm" src="assets/audio/music/layer-calm.mp3" loop preload="auto"></audio>
+                  <audio class="music__layer" data-label="Building" src="assets/audio/music/layer-mid.mp3" loop preload="auto"></audio>
+                  <audio class="music__layer" data-label="Intense" src="assets/audio/music/layer-intense.mp3" loop preload="auto"></audio>
+                </div>
+
+                <ul class="sfx" id="sfxList">
+                  <li class="sfx__item">
+                    <button class="sfx__play" type="button" aria-label="Play sound effect">
+                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                    </button>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Footsteps — gravel</p>
+                      <p class="sfx__desc">Layered foley with a randomized pitch and grain pass to avoid repetition on long traversal sections.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/footsteps-gravel.mp3" preload="none"></audio>
+                  </li>
+                  <li class="sfx__item">
+                    <button class="sfx__play" type="button" aria-label="Play sound effect">
+                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                    </button>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Impact — heavy</p>
+                      <p class="sfx__desc">Sub-heavy hit built from layered foley, a synthesized low end, and a resonant tail in Wwise.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/impact-heavy.mp3" preload="none"></audio>
+                  </li>
+                  <li class="sfx__item">
+                    <button class="sfx__play" type="button" aria-label="Play sound effect">
+                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                    </button>
+                    <div class="sfx__text">
+                      <p class="sfx__title">UI — confirm</p>
+                      <p class="sfx__desc">Short, clean confirmation tone tuned to sit above the mix without cutting through the music.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/ui-confirm.mp3" preload="none"></audio>
+                  </li>
+                  <li class="sfx__item">
+                    <button class="sfx__play" type="button" aria-label="Play sound effect">
+                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                    </button>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Ambience — wind loop</p>
+                      <p class="sfx__desc">Seamless bed layered from three field recordings, filtered per-area to match interior/exterior spaces.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/ambience-wind.mp3" preload="none"></audio>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- ---------- ART MODE CONTENT ---------- -->
+              <div class="mode-panel mode-panel--art">
+                <p class="console__desc">Modeled, textured, and animated 3D models and created pixel art.</p>
+
+                <div class="art-grid" id="artGrid">
+
+                  <div class="art-block" data-title="Protagonist study" data-desc="Silhouette and color exploration for the lead character across three passes.">
+                    <div class="art-block__images">
+                      <img class="art-block__img is-active" src="assets/images/art/protagonist-1.jpg" alt="Protagonist concept, pass one">
+                      <img class="art-block__img" src="assets/images/art/protagonist-2.jpg" alt="Protagonist concept, pass two">
+                      <img class="art-block__img" src="assets/images/art/protagonist-3.jpg" alt="Protagonist concept, pass three">
+                    </div>
+                    <span class="art-block__title">Protagonist study</span>
+                    <div class="art-block__overlay"><p>Silhouette and color exploration for the lead character across three passes.</p></div>
+                  </div>
+
+                  <div class="art-block" data-title="Environment blockout" data-desc="Grey-box to final pass for the central hub area, built for readable sightlines.">
+                    <div class="art-block__images">
+                      <img class="art-block__img is-active" src="assets/images/art/environment-1.jpg" alt="Environment concept, pass one">
+                      <img class="art-block__img" src="assets/images/art/environment-2.jpg" alt="Environment concept, pass two">
+                    </div>
+                    <span class="art-block__title">Environment blockout</span>
+                    <div class="art-block__overlay"><p>Grey-box to final pass for the central hub area, built for readable sightlines.</p></div>
+                  </div>
+
+                  <div class="art-block" data-title="Pixel art — enemies" data-desc="16x16 enemy sprite set with a shared four-frame walk cycle.">
+                    <div class="art-block__images">
+                      <img class="art-block__img is-active" src="assets/images/art/pixel-enemies-1.jpg" alt="Pixel art enemy sheet, pass one">
+                      <img class="art-block__img" src="assets/images/art/pixel-enemies-2.jpg" alt="Pixel art enemy sheet, pass two">
+                      <img class="art-block__img" src="assets/images/art/pixel-enemies-3.jpg" alt="Pixel art enemy sheet, pass three">
+                    </div>
+                    <span class="art-block__title">Pixel art — enemies</span>
+                    <div class="art-block__overlay"><p>16×16 enemy sprite set with a shared four-frame walk cycle.</p></div>
+                  </div>
+
+                  <div class="art-block" data-title="Prop set" data-desc="Hand-painted texture set for the interior prop kit, built for reuse across three biomes.">
+                    <div class="art-block__images">
+                      <img class="art-block__img is-active" src="assets/images/art/props-1.jpg" alt="Prop set, pass one">
+                      <img class="art-block__img" src="assets/images/art/props-2.jpg" alt="Prop set, pass two">
+                    </div>
+                    <span class="art-block__title">Prop set</span>
+                    <div class="art-block__overlay"><p>Hand-painted texture set for the interior prop kit, built for reuse across three biomes.</p></div>
+                  </div>
+
+                  <div class="art-block" data-title="Rig & animation" data-desc="Custom biped rig with a stylized secondary-motion pass on cloth and hair.">
+                    <div class="art-block__images">
+                      <img class="art-block__img is-active" src="assets/images/art/rig-1.jpg" alt="Rig and animation, pass one">
+                      <img class="art-block__img" src="assets/images/art/rig-2.jpg" alt="Rig and animation, pass two">
+                      <img class="art-block__img" src="assets/images/art/rig-3.jpg" alt="Rig and animation, pass three">
+                    </div>
+                    <span class="art-block__title">Rig &amp; animation</span>
+                    <div class="art-block__overlay"><p>Custom biped rig with a stylized secondary-motion pass on cloth and hair.</p></div>
+                  </div>
+
+                  <div class="art-block" data-title="Pixel art — UI" data-desc="Low-color UI icon set matched to the game's restricted in-game palette.">
+                    <div class="art-block__images">
+                      <img class="art-block__img is-active" src="assets/images/art/pixel-ui-1.jpg" alt="Pixel UI set, pass one">
+                      <img class="art-block__img" src="assets/images/art/pixel-ui-2.jpg" alt="Pixel UI set, pass two">
+                    </div>
+                    <span class="art-block__title">Pixel art — UI</span>
+                    <div class="art-block__overlay"><p>Low-color UI icon set matched to the game's restricted in-game palette.</p></div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </article>
+        <!-- To add another game later, duplicate the <article class="slide"> block above.
+             The carousel arrows and dots enable themselves automatically once there is more than one. -->
+
+      </div>
+    </div>
+
+    <button class="carousel__arrow carousel__arrow--next" type="button" disabled aria-label="Next project">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
+  <div class="carousel__dots" id="carouselDots" aria-hidden="true">
+    <span class="dot is-active"></span>
+  </div>
+</main>
+
+<!-- ============================================================
+     ABOUT
+     ============================================================ -->
+<section class="about" id="about">
+  <div class="about__inner">
+
+    <div class="about__intro">
+      <p class="section-eyebrow">About</p>
+      <h2 class="about__heading">Ten years of making games sound like they feel.</h2>
+      <p class="about__bio">
+        I'm an audio designer working across sound design, implementation, and music for interactive
+        media. I care most about the moment sound and gameplay stop feeling like separate layers —
+        where a footstep, a hit, or a swell in the score reads as one system instead of a mix of
+        assets. Edit this paragraph with your own bio.
+      </p>
+    </div>
+
+    <div class="about__skills">
+      <p class="section-eyebrow">Skills</p>
+      <ul class="chips">
+        <li class="chip">Wwise</li>
+        <li class="chip">FMOD</li>
+        <li class="chip">Unity</li>
+        <li class="chip">Unreal Engine</li>
+        <li class="chip">Pro Tools</li>
+        <li class="chip">Reaper</li>
+        <li class="chip">Sound Design</li>
+        <li class="chip">Dynamic / Adaptive Music</li>
+        <li class="chip">Foley</li>
+        <li class="chip">Field Recording</li>
+        <li class="chip">C# Audio Scripting</li>
+      </ul>
+    </div>
+
+    <div class="about__history">
+      <p class="section-eyebrow">History</p>
+      <ul class="log">
+        <li class="log__row">
+          <span class="log__time">2024 — Now</span>
+          <div class="log__text">
+            <p class="log__role">Audio Designer, Freelance</p>
+            <p class="log__place">Independent contracts across sound design and implementation.</p>
+          </div>
+        </li>
+        <li class="log__row">
+          <span class="log__time">2021 — 2024</span>
+          <div class="log__text">
+            <p class="log__role">Sound Designer, Studio Name</p>
+            <p class="log__place">Shipped audio for two titles, owned Wwise integration end to end.</p>
+          </div>
+        </li>
+        <li class="log__row">
+          <span class="log__time">2019 — 2021</span>
+          <div class="log__text">
+            <p class="log__role">Junior Audio Designer, Studio Name</p>
+            <p class="log__place">SFX creation, foley recording, and mix support.</p>
+          </div>
+        </li>
+        <li class="log__row">
+          <span class="log__time">2019</span>
+          <div class="log__text">
+            <p class="log__role">B.A., Sound &amp; Music Production</p>
+            <p class="log__place">School Name</p>
+          </div>
+        </li>
+      </ul>
+      <p class="about__edit-note">Replace the entries above with your own history.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER / CONTACT
+     ============================================================ -->
+<footer class="footer" id="contact">
+  <div class="footer__inner">
+    <p class="section-eyebrow section-eyebrow--inverse">Get in touch</p>
+    <h2 class="footer__heading">Let's make something sound right.</h2>
+    <a class="footer__email" href="mailto:hello@mattwarner.audio">hello@mattwarner.audio</a>
+
+    <div class="footer__links">
+      <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="#" target="_blank" rel="noopener">GitHub</a>
+      <a href="#" target="_blank" rel="noopener">Itch.io</a>
+      <a href="#" target="_blank" rel="noopener">SoundCloud</a>
+    </div>
+
+    <p class="footer__copy">© <span id="year"></span> Matt Warner. Built for GitHub Pages.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
