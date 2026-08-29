@@ -12,17 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   /* ------------------------------------------------------------
-     Eased scrolling helper — used by the scroll cue instead of
-     relying on the browser's native smooth-scroll, which can feel
-     abrupt. This eases in and out over a fixed duration.
+     Eased scrolling helper
      ------------------------------------------------------------ */
   function smoothScrollTo(targetY, duration = 1000) {
     const startY = window.scrollY;
     const diff = targetY - startY;
-    if (prefersReducedMotion) {
-      window.scrollTo(0, targetY);
-      return;
-    }
+    if (prefersReducedMotion) { window.scrollTo(0, targetY); return; }
     const startTime = performance.now();
     function step(now) {
       const t = Math.min((now - startTime) / duration, 1);
@@ -34,9 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------
-     Hero scroll cue — click to scroll, or auto-scroll after 5s
-     of inactivity (cancelled the moment the person scrolls or
-     clicks on their own).
+     Hero scroll cue — click to scroll, or auto-scroll after 5s idle
      ------------------------------------------------------------ */
   const scrollCue = document.getElementById('scrollCue');
   const workSection = document.getElementById('work');
@@ -46,16 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetY = workSection.getBoundingClientRect().top + window.scrollY;
       smoothScrollTo(targetY, 1000);
     };
+    scrollCue.addEventListener('click', () => { cancelAutoScroll(); scrollToWork(); });
 
-    scrollCue.addEventListener('click', () => {
-      cancelAutoScroll();
-      scrollToWork();
-    });
-
-    let autoScrollTimer = window.setTimeout(() => {
-      scrollToWork();
-    }, 5000);
-
+    let autoScrollTimer = window.setTimeout(scrollToWork, 5000);
     function cancelAutoScroll() {
       if (autoScrollTimer) {
         window.clearTimeout(autoScrollTimer);
@@ -66,76 +52,58 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     function onEarlyScroll() { cancelAutoScroll(); }
-
     window.addEventListener('scroll', onEarlyScroll, { passive: true });
     window.addEventListener('wheel', onEarlyScroll, { passive: true });
     window.addEventListener('touchstart', onEarlyScroll, { passive: true });
   }
 
   /* ------------------------------------------------------------
-     Hero parallax — the background video scrolls slower than the page
+     Hero parallax
      ------------------------------------------------------------ */
   const heroWrap = document.getElementById('heroVideoWrap');
   if (heroWrap && !prefersReducedMotion) {
-    const speed = 0.4; // < 1 means the video moves slower than the page
+    const speed = 0.4;
     let ticking = false;
-
     const updateParallax = () => {
-      const offset = window.scrollY * speed;
-      heroWrap.style.transform = `translate3d(0, ${offset}px, 0)`;
+      heroWrap.style.transform = `translate3d(0, ${window.scrollY * speed}px, 0)`;
       ticking = false;
     };
-
     window.addEventListener('scroll', () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateParallax);
-        ticking = true;
-      }
+      if (!ticking) { window.requestAnimationFrame(updateParallax); ticking = true; }
     }, { passive: true });
   }
 
   /* ------------------------------------------------------------
-     Text scramble — unjumbles a string from random characters.
-     Used for the hero role label on load and whenever it changes.
+     Text scramble
      ------------------------------------------------------------ */
   function scrambleText(el, target, duration = 900) {
     if (!el) return;
-    if (prefersReducedMotion) {
-      el.textContent = target;
-      return;
-    }
+    if (prefersReducedMotion) { el.textContent = target; return; }
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!<>-_/[]{}=+*^?#';
     if (el._scrambleFrame) cancelAnimationFrame(el._scrambleFrame);
     const start = performance.now();
     const length = target.length;
-
     function tick(now) {
       const progress = Math.min((now - start) / duration, 1);
       const revealCount = Math.floor(progress * length);
       let out = '';
       for (let i = 0; i < length; i++) {
-        if (i < revealCount || target[i] === ' ') {
-          out += target[i];
-        } else {
-          out += charset[Math.floor(Math.random() * charset.length)];
-        }
+        out += (i < revealCount || target[i] === ' ') ? target[i] : charset[Math.floor(Math.random() * charset.length)];
       }
       el.textContent = out;
-      if (progress < 1) {
-        el._scrambleFrame = requestAnimationFrame(tick);
-      } else {
-        el.textContent = target;
-      }
+      if (progress < 1) el._scrambleFrame = requestAnimationFrame(tick);
+      else el.textContent = target;
     }
     el._scrambleFrame = requestAnimationFrame(tick);
   }
 
   /* ------------------------------------------------------------
-     Mode switching — Audio / Art tabs drive the background color,
-     the hero role label, the about-section role word, and a soft
-     scale animation on the console so content changes don't snap.
+     Mode switching (Audio / Art) — background color, hero role,
+     about role word, console scale animation, URL hash, and the
+     scroll-cue seam color all stay in sync.
      ------------------------------------------------------------ */
   const showcase = document.querySelector('.showcase');
+  const cueWindow = document.getElementById('cueWindow');
   const tabs = document.querySelectorAll('.tab');
   const heroRole = document.getElementById('heroRole');
   const aboutRoleWord = document.getElementById('aboutRoleWord');
@@ -146,42 +114,49 @@ document.addEventListener('DOMContentLoaded', () => {
     art:   { hero: '3D Artist',      about: 'Game Artist' }
   };
 
-  function setMode(mode) {
+  function getModeFromHash() {
+    const h = window.location.hash.replace('#', '');
+    return (h === 'audio' || h === 'art') ? h : null;
+  }
+
+  function applyModeState(mode) {
+    showcase.dataset.mode = mode;
+    if (cueWindow) cueWindow.dataset.mode = mode;
+    tabs.forEach(t => {
+      const active = t.dataset.mode === mode;
+      t.classList.toggle('is-active', active);
+      t.setAttribute('aria-selected', String(active));
+    });
+    if (aboutRoleWord) aboutRoleWord.textContent = MODE_COPY[mode].about;
+  }
+
+  function setMode(mode, { updateHash = true } = {}) {
     if (!showcase || showcase.dataset.mode === mode) return;
 
-    const applyChange = () => {
-      showcase.dataset.mode = mode;
-      tabs.forEach(t => {
-        const active = t.dataset.mode === mode;
-        t.classList.toggle('is-active', active);
-        t.setAttribute('aria-selected', String(active));
-      });
+    const finish = () => {
+      applyModeState(mode);
       scrambleText(heroRole, MODE_COPY[mode].hero);
-      if (aboutRoleWord) aboutRoleWord.textContent = MODE_COPY[mode].about;
-      if (consoleEl) {
-        requestAnimationFrame(() => consoleEl.classList.remove('is-switching'));
-      }
+      if (updateHash) history.replaceState(null, '', '#' + mode);
+      if (consoleEl) requestAnimationFrame(() => consoleEl.classList.remove('is-switching'));
     };
 
     if (consoleEl && !prefersReducedMotion) {
       consoleEl.classList.add('is-switching');
-      window.setTimeout(applyChange, 220);
+      window.setTimeout(finish, 220);
     } else {
-      applyChange();
+      finish();
     }
   }
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => setMode(tab.dataset.mode));
-  });
+  tabs.forEach(tab => tab.addEventListener('click', () => setMode(tab.dataset.mode)));
 
-  // Entrance scramble for the hero role label on load.
-  scrambleText(heroRole, MODE_COPY.audio.hero, 1100);
+  // Initial mode: URL hash (#audio / #art) can pre-select a mode for sharing.
+  const initialMode = getModeFromHash() || 'audio';
+  if (initialMode !== 'audio') applyModeState(initialMode);
+  scrambleText(heroRole, MODE_COPY[initialMode].hero, 1100);
 
   /* ------------------------------------------------------------
-     Carousel — supports multiple slides, currently greyed out
-     because there is only one project. Add more <article class="slide">
-     blocks in index.html and this will enable itself automatically.
+     Carousel
      ------------------------------------------------------------ */
   const track = document.getElementById('carouselTrack');
   const dotsWrap = document.getElementById('carouselDots');
@@ -191,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (track) {
     const slides = Array.from(track.children);
     let current = 0;
-
     const renderDots = () => {
       dotsWrap.innerHTML = '';
       slides.forEach((_, i) => {
@@ -200,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dotsWrap.appendChild(dot);
       });
     };
-
     const goTo = (index) => {
       current = Math.max(0, Math.min(index, slides.length - 1));
       track.style.transform = `translateX(-${current * 100}%)`;
@@ -208,9 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
       prevBtn.disabled = current === 0;
       nextBtn.disabled = current === slides.length - 1;
     };
-
     renderDots();
-
     if (slides.length > 1) {
       prevBtn.addEventListener('click', () => goTo(current - 1));
       nextBtn.addEventListener('click', () => goTo(current + 1));
@@ -222,9 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------
-     Adaptive music — five named states, snap-switched with a
-     short crossfade, driven by a stepped slider. Auto-advances
-     to the next state after 10s of no interaction.
+     Adaptive music — 5 states, all tracks loaded and played in
+     sync; the slider sets the active track to full volume and
+     everything else to 0. The slider itself animates smoothly to
+     a new position when advanced automatically or on idle.
      ------------------------------------------------------------ */
   const musicRoot = document.querySelector('.music');
   if (musicRoot) {
@@ -233,10 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { label: 'Shop',      src: 'assets/audio/music/layer_2.mp3' },
       { label: 'Boss',      src: 'assets/audio/music/layer_3.mp3' },
       { label: 'Loading',   src: 'assets/audio/music/layer_4.mp3' },
-      // Only 4 files were provided for 5 states — Game Over reuses
-      // Loading's track for now. Point this at a real layer_5.mp3
-      // once you have one and it'll pick it up automatically.
-      { label: 'Game Over', src: 'assets/audio/music/layer_4.mp3' }
+      { label: 'Game Over', src: 'assets/audio/music/layer_5.mp3' }
     ];
 
     const stateAudios = MUSIC_STATES.map(state => {
@@ -250,52 +219,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const slider = document.getElementById('musicFader');
     const readout = document.getElementById('musicReadout');
     const playBtn = document.getElementById('musicPlay');
-
     slider.max = String(MUSIC_STATES.length - 1);
 
     let activeIndex = 0;
     let isPlaying = false;
     let idleTimer = null;
+    let syncTimer = null;
     const IDLE_MS = 10000;
-    const FADE_MS = 400;
 
     const resetIdleTimer = () => {
       if (idleTimer) window.clearTimeout(idleTimer);
       idleTimer = window.setTimeout(() => {
-        switchState((activeIndex + 1) % MUSIC_STATES.length);
+        animateSliderTo((activeIndex + 1) % MUSIC_STATES.length);
       }, IDLE_MS);
     };
 
-    function switchState(newIndex) {
-      if (newIndex === activeIndex) return;
-      const oldAudio = stateAudios[activeIndex];
-      const newAudio = stateAudios[newIndex];
-      activeIndex = newIndex;
-      slider.value = String(newIndex);
-      readout.textContent = MUSIC_STATES[newIndex].label.toUpperCase();
-
-      if (isPlaying) {
-        newAudio.currentTime = 0;
-        newAudio.play().catch(() => {});
-        const start = performance.now();
-        const tick = (now) => {
-          const t = Math.min((now - start) / FADE_MS, 1);
-          oldAudio.volume = 1 - t;
-          newAudio.volume = t;
-          if (t < 1) {
-            requestAnimationFrame(tick);
-          } else {
-            oldAudio.pause();
-            oldAudio.currentTime = 0;
-            oldAudio.volume = 0;
-          }
-        };
-        requestAnimationFrame(tick);
+    function rampVolumes(duration = 120) {
+      const start = performance.now();
+      const startVolumes = stateAudios.map(a => a.volume);
+      const targets = stateAudios.map((_, i) => (i === activeIndex ? 1 : 0));
+      function tick(now) {
+        const t = Math.min((now - start) / duration, 1);
+        stateAudios.forEach((a, i) => { a.volume = startVolumes[i] + (targets[i] - startVolumes[i]) * t; });
+        if (t < 1) requestAnimationFrame(tick);
       }
+      requestAnimationFrame(tick);
+    }
+
+    function setActiveIndex(newIndex) {
+      if (newIndex === activeIndex) return;
+      activeIndex = newIndex;
+      readout.textContent = MUSIC_STATES[newIndex].label.toUpperCase();
+      if (isPlaying) rampVolumes();
       resetIdleTimer();
     }
 
-    slider.addEventListener('input', (e) => switchState(Number(e.target.value)));
+    // Smoothly animates the slider's visual position to a new index,
+    // then applies the state change once it arrives (used for the
+    // idle auto-advance so it doesn't just snap).
+    function animateSliderTo(newIndex, duration = 500) {
+      const startVal = Number(slider.value);
+      if (startVal === newIndex) return;
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        slider.value = String(startVal + (newIndex - startVal) * eased);
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          slider.value = String(newIndex);
+          setActiveIndex(newIndex);
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    slider.addEventListener('input', (e) => setActiveIndex(Number(e.target.value)));
 
     const setPlayingUI = (playing) => {
       musicRoot.querySelector('.icon-play').hidden = playing;
@@ -305,16 +285,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     playBtn.addEventListener('click', () => {
       if (!isPlaying) {
-        const active = stateAudios[activeIndex];
-        active.currentTime = 0;
-        active.volume = 1;
-        active.play().catch(() => {});
+        stateAudios.forEach((a, i) => {
+          a.currentTime = 0;
+          a.volume = i === activeIndex ? 1 : 0;
+          a.play().catch(() => {});
+        });
         isPlaying = true;
         setPlayingUI(true);
+        syncTimer = window.setInterval(() => {
+          const ref = stateAudios[activeIndex].currentTime;
+          stateAudios.forEach(a => { if (Math.abs(a.currentTime - ref) > 0.15) a.currentTime = ref; });
+        }, 4000);
       } else {
         stateAudios.forEach(a => a.pause());
         isPlaying = false;
         setPlayingUI(false);
+        if (syncTimer) window.clearInterval(syncTimer);
       }
       resetIdleTimer();
     });
@@ -324,21 +310,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------
-     SFX list — independent one-shot players with a real,
-     decoded-audio waveform and a playback progress overlay.
+     SFX list — waveform progress players
      ------------------------------------------------------------ */
   function buildFallbackHeights(count, seed) {
-    return Array.from({ length: count }, (_, i) =>
-      0.18 + 0.75 * Math.abs(Math.sin(i * 12.9898 + seed * 78.233))
-    );
+    return Array.from({ length: count }, (_, i) => 0.18 + 0.75 * Math.abs(Math.sin(i * 12.9898 + seed * 78.233)));
   }
-
   function applyHeights(barGroups, heights) {
-    barGroups.forEach(bars => {
-      bars.forEach((bar, i) => bar.style.setProperty('--h', heights[i].toFixed(3)));
-    });
+    barGroups.forEach(bars => bars.forEach((bar, i) => bar.style.setProperty('--h', heights[i].toFixed(3))));
   }
-
   async function buildWaveform(waveformEl, audioEl, seed) {
     const BAR_COUNT = 28;
     const groups = Array.from(waveformEl.querySelectorAll('.waveform__bars')).map(container => {
@@ -352,9 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       return bars;
     });
-
     applyHeights(groups, buildFallbackHeights(BAR_COUNT, seed));
-
     try {
       const src = audioEl.getAttribute('src');
       if (!src) return;
@@ -370,18 +347,13 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 0; i < BAR_COUNT; i++) {
         let sum = 0;
         const offset = i * blockSize;
-        for (let j = 0; j < blockSize; j++) {
-          sum += Math.abs(raw[offset + j] || 0);
-        }
+        for (let j = 0; j < blockSize; j++) sum += Math.abs(raw[offset + j] || 0);
         peaks.push(sum / blockSize);
       }
       const max = Math.max(...peaks) || 1;
-      const normalized = peaks.map(p => 0.12 + 0.88 * (p / max));
-      applyHeights(groups, normalized);
+      applyHeights(groups, peaks.map(p => 0.12 + 0.88 * (p / max)));
       ctx.close();
-    } catch (err) {
-      // Real audio not available yet — the fallback shape stays in place.
-    }
+    } catch (err) { /* fallback shape stays in place */ }
   }
 
   const sfxObserver = 'IntersectionObserver' in window
@@ -404,19 +376,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const playIcon = btn.querySelector('.icon-play');
     const pauseIcon = btn.querySelector('.icon-pause');
 
-    if (sfxObserver) {
-      item._sfxData = { waveform, audio, seed: index + 1 };
-      sfxObserver.observe(item);
-    } else {
-      buildWaveform(waveform, audio, index + 1);
-    }
+    if (sfxObserver) { item._sfxData = { waveform, audio, seed: index + 1 }; sfxObserver.observe(item); }
+    else buildWaveform(waveform, audio, index + 1);
 
     const setPlaying = (playing) => {
       btn.classList.toggle('is-playing', playing);
       playIcon.hidden = playing;
       pauseIcon.hidden = !playing;
     };
-
     const updateProgress = () => {
       const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
       progress.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
@@ -425,10 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btn.addEventListener('click', () => {
       if (audio.paused) {
-        // Stop any other SFX so only one plays at a time.
-        document.querySelectorAll('.sfx__item audio').forEach(other => {
-          if (other !== audio && !other.paused) other.pause();
-        });
+        document.querySelectorAll('.sfx__item audio').forEach(other => { if (other !== audio && !other.paused) other.pause(); });
         audio.currentTime = 0;
         audio.play().catch(() => {});
         setPlaying(true);
@@ -438,39 +402,105 @@ document.addEventListener('DOMContentLoaded', () => {
         setPlaying(false);
       }
     });
-
-    audio.addEventListener('ended', () => {
-      setPlaying(false);
-      progress.style.clipPath = 'inset(0 100% 0 0)';
-    });
+    audio.addEventListener('ended', () => { setPlaying(false); progress.style.clipPath = 'inset(0 100% 0 0)'; });
     audio.addEventListener('pause', () => setPlaying(false));
   });
 
   /* ------------------------------------------------------------
-     Art grid — each block auto-carousels its images on a timer,
-     and pauses while hovered so the description stays readable.
+     Art grid auto-carousel
      ------------------------------------------------------------ */
   document.querySelectorAll('.art-block').forEach((block, blockIndex) => {
     const images = Array.from(block.querySelectorAll('.art-block__img'));
     if (images.length < 2 || prefersReducedMotion) return;
-
-    let index = 0;
-    let timer = null;
-    const intervalMs = 3800;
-    const staggerMs = blockIndex * 260;
-
-    const advance = () => {
-      images[index].classList.remove('is-active');
-      index = (index + 1) % images.length;
-      images[index].classList.add('is-active');
-    };
-
+    let index = 0, timer = null;
+    const intervalMs = 3800, staggerMs = blockIndex * 260;
+    const advance = () => { images[index].classList.remove('is-active'); index = (index + 1) % images.length; images[index].classList.add('is-active'); };
     const start = () => { timer = window.setInterval(advance, intervalMs); };
     const stop = () => { if (timer) window.clearInterval(timer); };
-
     window.setTimeout(start, staggerMs);
     block.addEventListener('mouseenter', stop);
     block.addEventListener('mouseleave', start);
   });
+
+  /* ------------------------------------------------------------
+     Site sound — a looping background bed that ducks to 0 whenever
+     a click or scroll sound plays, plus a mute toggle. The bed only
+     starts after the first user interaction (browser autoplay
+     policy — sound can't start on its own before that).
+     ------------------------------------------------------------ */
+  const SOUND_PATHS = {
+    click: 'assets/audio/ui/click.mp3',
+    clickEmpty: 'assets/audio/ui/click-empty.mp3',
+    scroll: 'assets/audio/ui/scroll.mp3'
+  };
+  const BG_VOLUME = 0.32;
+  const bgAudio = new Audio('assets/audio/ui/bg-ambient.mp3');
+  bgAudio.loop = true;
+  bgAudio.volume = 0;
+
+  let soundEnabled = true;
+  let soundUnlocked = false;
+  let duckTimer = null;
+
+  function rampBg(target, duration = 350) {
+    const start = performance.now();
+    const startVol = bgAudio.volume;
+    function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      bgAudio.volume = startVol + (target - startVol) * t;
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function duckBackground() {
+    bgAudio.volume = 0;
+    if (duckTimer) window.clearTimeout(duckTimer);
+    duckTimer = window.setTimeout(() => rampBg(BG_VOLUME, 400), 350);
+  }
+
+  function playOneShot(src) {
+    if (!soundEnabled) return;
+    const a = new Audio(src);
+    a.volume = 0.55;
+    a.play().catch(() => {});
+    duckBackground();
+  }
+
+  function unlockSound() {
+    if (soundUnlocked || !soundEnabled) return;
+    soundUnlocked = true;
+    bgAudio.play().then(() => rampBg(BG_VOLUME, 600)).catch(() => {});
+  }
+  document.addEventListener('pointerdown', unlockSound, { once: true });
+
+  document.addEventListener('click', (e) => {
+    const isInteractive = e.target.closest('button, a, input, .tab, .art-block, .dot');
+    playOneShot(isInteractive ? SOUND_PATHS.click : SOUND_PATHS.clickEmpty);
+  });
+
+  let lastScrollSound = 0;
+  window.addEventListener('scroll', () => {
+    const now = performance.now();
+    if (now - lastScrollSound > 700) {
+      lastScrollSound = now;
+      playOneShot(SOUND_PATHS.scroll);
+    }
+  }, { passive: true });
+
+  const muteBtn = document.getElementById('soundToggle');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      muteBtn.classList.toggle('is-muted', !soundEnabled);
+      muteBtn.setAttribute('aria-pressed', String(!soundEnabled));
+      if (!soundEnabled) {
+        bgAudio.pause();
+      } else if (soundUnlocked) {
+        bgAudio.play().catch(() => {});
+        rampBg(BG_VOLUME, 300);
+      }
+    });
+  }
 
 });
