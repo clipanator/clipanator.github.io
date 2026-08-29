@@ -6,6 +6,8 @@
 <title>Matt Warner — Audio Designer</title>
 <meta name="description" content="Matt Warner — audio designer for video games. Sound design, implementation, and adaptive music.">
 
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23161A1F'/%3E%3Crect x='7' y='13' width='3' height='6' rx='1.5' fill='%23FDFCFA'/%3E%3Crect x='14.5' y='8' width='3' height='16' rx='1.5' fill='%2393BFD9'/%3E%3Crect x='22' y='11' width='3' height='10' rx='1.5' fill='%23FDFCFA'/%3E%3C/svg%3E">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,18 +17,42 @@
 <body>
 
 <!-- ============================================================
+     FLOATING CONTROLS (fixed, always on top)
+     ============================================================ -->
+<a class="floating-resume" href="assets/resume/matt-warner-resume.pdf" download aria-label="Download résumé">
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
+  <span>Résumé</span>
+</a>
+
+<div class="master-volume">
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+  <input type="range" id="masterVolume" min="0" max="100" value="60" aria-label="Master site volume">
+</div>
+
+<!-- ============================================================
      HERO
      ============================================================ -->
 <header class="hero" id="top">
-  <div class="hero__video-wrap" id="heroVideoWrap">
-    <video class="hero__video" autoplay muted loop playsinline preload="auto">
-      <source src="assets/video/hero-bg.webm" type="video/webm">
-    </video>
-    <div class="hero__scrim"></div>
+  <div class="hero__clip">
+    <div class="hero__video-wrap" id="heroVideoWrap">
+      <video class="hero__video" autoplay muted loop playsinline preload="auto">
+        <source src="assets/video/hero-bg.webm" type="video/webm">
+      </video>
+      <div class="hero__scrim"></div>
+    </div>
   </div>
 
   <div class="hero__content">
-    <h1 class="hero__name">Matt Warner</h1>
+    <p class="hero__eyebrow">Sound Design, Music, Wwise, Mixing, Mastering</p>
+    <div class="hero__namerow">
+      <div class="hero__wave" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <h1 class="hero__name">Matt Warner</h1>
+      <div class="hero__wave" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
     <p class="hero__role" id="heroRole">Audio Designer</p>
   </div>
 
@@ -35,7 +61,7 @@
     <span class="scrollcue__ring"></span>
     <span class="scrollcue__core">
       <svg viewBox="0 0 24 12" width="20" height="10" aria-hidden="true">
-        <path d="M2 2c4 6 16 6 20 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M2 10c4-6 16-6 20 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
       </svg>
     </span>
   </button>
@@ -75,7 +101,10 @@
             </div>
 
             <div class="console__body">
-              <h2 class="console__title">Resultare</h2>
+              <div class="console__title-row">
+                <h2 class="console__title">Resultare</h2>
+                <span class="console__year">2026</span>
+              </div>
 
               <!-- ---------- AUDIO MODE CONTENT ---------- -->
               <div class="mode-panel mode-panel--audio">
@@ -89,6 +118,10 @@
 
                   <div class="fader">
                     <input type="range" class="fader__input" id="musicFader" min="0" max="4" value="0" step="1" aria-label="Switch the adaptive music state">
+                    <div class="fader__track" aria-hidden="true">
+                      <div class="fader__fill" id="faderFill"></div>
+                      <div class="fader__thumb" id="faderThumb"></div>
+                    </div>
                   </div>
 
                   <button class="music__play" id="musicPlay" type="button" aria-label="Play adaptive music">
@@ -100,6 +133,7 @@
 
                 <ul class="sfx" id="sfxList">
                   <li class="sfx__item">
+                    <p class="sfx__title">Ball_Shoot</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -110,13 +144,11 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Ball_Shoot</p>
-                      <p class="sfx__desc">A bass-heavy shooting sound that plays when the cannon fires a ball.</p>
-                    </div>
+                    <p class="sfx__desc">A bass-heavy shooting sound that plays when the cannon fires a ball.</p>
                     <audio src="assets/audio/sfx/resultare_1.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
+                    <p class="sfx__title">Shop_ItemBuy</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -127,13 +159,11 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Shop_ItemBuy</p>
-                      <p class="sfx__desc">A synth chime played along coin foley and a long tail that plays when an item is purchased from the shop.</p>
-                    </div>
+                    <p class="sfx__desc">A synth chime played along coin foley and a long tail that plays when an item is purchased from the shop.</p>
                     <audio src="assets/audio/sfx/resultare_2.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
+                    <p class="sfx__title">Barrier_Break</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -144,13 +174,11 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Barrier_Break</p>
-                      <p class="sfx__desc">A powerful synth one-shot that plays when the "goop" barrier at the bottom of the screen is destroyed.</p>
-                    </div>
+                    <p class="sfx__desc">A powerful synth one-shot that plays when the "goop" barrier at the bottom of the screen is destroyed.</p>
                     <audio src="assets/audio/sfx/resultare_3.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
+                    <p class="sfx__title">Round_Boss</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -161,13 +189,11 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Round_Boss</p>
-                      <p class="sfx__desc">A heavy bass synth paired with glass shattering and a police siren that plays when entering a Boss round.</p>
-                    </div>
+                    <p class="sfx__desc">A heavy bass synth paired with glass shattering and a police siren that plays when entering a Boss round.</p>
                     <audio src="assets/audio/sfx/resultare_4.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
+                    <p class="sfx__title">Score_Overload</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -178,13 +204,11 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Score_Overload</p>
-                      <p class="sfx__desc">An electric, wooshy chime that the score counter plays when the player's ball achieves an exceedingly high score.</p>
-                    </div>
+                    <p class="sfx__desc">An electric, wooshy chime that the score counter plays when the player's ball achieves an exceedingly high score.</p>
                     <audio src="assets/audio/sfx/resultare_5.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
+                    <p class="sfx__title">Shop_LegendaryAppear</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -195,13 +219,11 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Shop_LegendaryAppear</p>
-                      <p class="sfx__desc">A woosh that plays alerting the player that a legendary item appeared in the shop.</p>
-                    </div>
+                    <p class="sfx__desc">A woosh that plays alerting the player that a legendary item appeared in the shop.</p>
                     <audio src="assets/audio/sfx/resultare_6.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
+                    <p class="sfx__title">Ball_Break_Base</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -212,13 +234,11 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Ball_Break_Base</p>
-                      <p class="sfx__desc">A popping sound that plays when a ball despawns. Different balls have layers that play on top of this sound that are thematic to their type.</p>
-                    </div>
+                    <p class="sfx__desc">A popping sound that plays when a ball despawns. Different balls have layers that play on top of this sound that are thematic to their type.</p>
                     <audio src="assets/audio/sfx/resultare_7.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
+                    <p class="sfx__title">Menu_Button_Settings_Click</p>
                     <div class="sfx__player">
                       <button class="sfx__play" type="button" aria-label="Play sound effect">
                         <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -229,13 +249,17 @@
                         <div class="waveform__bars waveform__progress"></div>
                       </div>
                     </div>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Menu_Button_Settings_Click</p>
-                      <p class="sfx__desc">A short, cute, and satisfying "click" that plays when clicking on a button in the Settings menu.</p>
-                    </div>
+                    <p class="sfx__desc">A short, cute, and satisfying "click" that plays when clicking on a button in the Settings menu.</p>
                     <audio src="assets/audio/sfx/resultare_8.mp3" preload="none"></audio>
                   </li>
                 </ul>
+
+                <div class="wwise-session">
+                  <span class="wwise-session__label">Wwise session</span>
+                  <video class="wwise-session__video" muted loop playsinline preload="metadata" autoplay>
+                    <source src="assets/video/wwise-session.webm" type="video/webm">
+                  </video>
+                </div>
               </div>
 
               <!-- ---------- ART MODE CONTENT ---------- -->
@@ -289,6 +313,11 @@
                 </div>
               </div>
 
+              <a class="steam-link" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+                View Resultare on Steam
+              </a>
+
             </div>
           </div>
         </article>
@@ -318,8 +347,9 @@
       <p class="section-eyebrow">About</p>
       <h2 class="about__heading">Hi 👋, I'm Matt Warner, a <span id="aboutRoleWord">Sound Designer</span> from Ottawa, Ontario</h2>
       <p class="about__bio">
-        I started my career learning VFX for film and television, but found my niche when exploring
-        audio. I love diving deep into the technical aspects of different software.
+        I'm a game audio designer specializing in sound design, interactive music, and technical audio
+        implementation. I started my career learning VFX for film and television, but found my niche
+        when exploring audio. I love diving deep into the technical aspects of different software.
       </p>
     </div>
 
@@ -357,16 +387,16 @@
       <p class="section-eyebrow">History</p>
       <ul class="log">
         <li class="log__row">
-          <span class="log__time">Aug 2023</span>
+          <span class="log__time">Present</span>
           <div class="log__text">
-            <p class="log__role">Music Industry Arts (Honours)</p>
+            <p class="log__role">Game Art</p>
             <p class="log__place">Algonquin College of Applied Arts and Technology</p>
           </div>
         </li>
         <li class="log__row">
-          <span class="log__time">Present</span>
+          <span class="log__time">Aug 2023</span>
           <div class="log__text">
-            <p class="log__role">Game Art</p>
+            <p class="log__role">Music Industry Arts (Honours)</p>
             <p class="log__place">Algonquin College of Applied Arts and Technology</p>
           </div>
         </li>
@@ -385,6 +415,10 @@
           </div>
         </li>
       </ul>
+      <a class="resume-link" href="assets/resume/matt-warner-resume.pdf" download>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
+        Download Résumé
+      </a>
     </div>
 
   </div>
@@ -404,9 +438,16 @@
       <a href="https://open.spotify.com/artist/1xlcv6ZdoiTk5F6H9MruxE" target="_blank" rel="noopener">Spotify</a>
     </div>
 
-    <p class="footer__copy">© <span id="year"></span> Matt Warner. Built for GitHub Pages.</p>
+    <p class="footer__copy">© <span id="year"></span> Matt Warner.</p>
   </div>
 </footer>
+
+<!-- ============================================================
+     UI SOUND TEMPLATES (not rendered — cloned and played by script.js)
+     ============================================================ -->
+<audio id="sndClickInteractive" src="assets/audio/ui/click-interactive.mp3" preload="auto"></audio>
+<audio id="sndClickEmpty" src="assets/audio/ui/click-empty.mp3" preload="auto"></audio>
+<audio id="sndScroll" src="assets/audio/ui/scroll.mp3" preload="auto"></audio>
 
 <script src="script.js"></script>
 </body>
