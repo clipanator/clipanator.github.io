@@ -43,15 +43,11 @@
   </div>
 
   <div class="hero__content">
-    <p class="hero__eyebrow">Sound Design, Music, Wwise, Mixing, Mastering</p>
+    <p class="hero__eyebrow">3D Modeling, Texturing, Animation, Pixel art</p>
     <div class="hero__namerow">
-      <div class="hero__wave" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
+      <div class="hero__wave" aria-hidden="true"></div>
       <h1 class="hero__name">Matt Warner</h1>
-      <div class="hero__wave" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
+      <div class="hero__wave" aria-hidden="true"></div>
     </div>
     <p class="hero__role" id="heroRole">Audio Designer</p>
   </div>
@@ -310,19 +306,61 @@
                     <div class="art-block__overlay"><p>Cat model, rigging, and animations</p></div>
                   </div>
 
+                  <div class="art-block" data-title="Capsule" data-desc="Capsule model and animations">
+                    <div class="art-block__images">
+                      <video class="art-block__video is-active" src="assets/video/capsule.webm" muted loop playsinline autoplay></video>
+                    </div>
+                    <span class="art-block__title">Capsule</span>
+                    <div class="art-block__overlay"><p>Capsule model and animations</p></div>
+                  </div>
+
+                  <div class="art-block" data-title="Cat animations" data-desc="Cat animations">
+                    <div class="art-block__images">
+                      <video class="art-block__video is-active" src="assets/video/moeanimations.webm" muted loop playsinline autoplay></video>
+                    </div>
+                    <span class="art-block__title">Cat animations</span>
+                    <div class="art-block__overlay"><p>Cat animations</p></div>
+                  </div>
+
                 </div>
               </div>
 
-              <a class="steam-link" href="#" target="_blank" rel="noopener">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+              <a class="steam-link" href="https://store.steampowered.com/app/3062650/Resultare/" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.98 2 2.88 5.82 2.14 10.76l4.9 2.03a2.7 2.7 0 011.5-.46c.14 0 .27.01.4.03l2.18-3.19-.01-.05a3.42 3.42 0 113.42 3.43h-.06l-3.13 2.27a2.7 2.7 0 01-.13.85 2.72 2.72 0 01-5.29.9L2.2 15.1A10 10 0 1012 2z"/><circle cx="15.1" cy="9" r="1.55"/><circle cx="6.9" cy="15.3" r="1.35"/></svg>
                 View Resultare on Steam
               </a>
 
             </div>
           </div>
         </article>
-        <!-- To add another game later, duplicate the <article class="slide"> block above.
-             The carousel arrows and dots enable themselves automatically once there is more than one. -->
+
+        <!-- ============ SLIDE 2 : ARCANE SOUND RE-DESIGN (Audio tab only) ============ -->
+        <article class="slide" data-index="1" data-mode="audio">
+          <div class="console">
+            <div class="console__media console__media--player">
+              <video class="console__video is-active" id="arcaneVideoA" controls playsinline preload="metadata">
+                <source src="assets/video/arcane-final-scene.mp4" type="video/mp4">
+              </video>
+              <video class="console__video" id="arcaneVideoB" controls playsinline preload="metadata" hidden>
+                <source src="assets/video/arcane-project-file.mp4" type="video/mp4">
+              </video>
+              <button class="media-swap" id="arcaneSwap" type="button" aria-label="Switch to the other video">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4M3 12v-2a4 4 0 014-4h14M7 22l-4-4 4-4M21 12v2a4 4 0 01-4 4H3"/></svg>
+              </button>
+              <span class="console__media-tag" id="arcaneMediaTag">Final Scene</span>
+            </div>
+            <div class="console__body">
+              <div class="console__title-row">
+                <h2 class="console__title">Arcane Sound Re-Design</h2>
+                <span class="console__year">2026</span>
+              </div>
+              <p class="console__desc">A sound re-design for a scene in the TV Series Arcane.</p>
+            </div>
+          </div>
+        </article>
+        <!-- To add another game to the main carousel, duplicate the Resultare <article class="slide">
+             block (no data-mode attribute = shows in both tabs). Add data-mode="audio" or
+             data-mode="art" to restrict a slide to one tab, as done above for the Arcane slide. -->
 
       </div>
     </div>
@@ -349,7 +387,9 @@
       <p class="about__bio">
         I'm a game audio designer specializing in sound design, interactive music, and technical audio
         implementation. I started my career learning VFX for film and television, but found my niche
-        when exploring audio. I love diving deep into the technical aspects of different software.
+        when exploring audio. I'm extremely passionate about all things audio and have skills in VFX,
+        motion graphics, 3D modeling, and 3D animation as well. I love diving deep into the technical
+        aspects of different software.
       </p>
     </div>
 

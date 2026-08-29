@@ -46,7 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const startVol = el.volume;
     const endVol = clamp01(targetBase * MASTER.volume);
     const t0 = performance.now();
+    // Tag this as the latest fade requested for this element — if another
+    // fadeTo() comes in before this one finishes (e.g. dragging the music
+    // slider quickly across several states), the older loop below detects
+    // it's stale and stops, instead of the two fights over el.volume.
+    const token = {};
+    el._fadeToken = token;
     function tick(now) {
+      if (el._fadeToken !== token) return;
       const t = Math.min((now - t0) / duration, 1);
       el.volume = startVol + (endVol - startVol) * t;
       if (t < 1) requestAnimationFrame(tick);
@@ -96,15 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const sndScroll = document.getElementById('sndScroll');
 
   document.addEventListener('click', (e) => {
+    if (e.target.closest('.sfx__play')) return; // let the SFX preview speak for itself
     const isInteractive = e.target.closest('button, a, [role="tab"]');
-    playOneShot(isInteractive ? sndClickInteractive : sndClickEmpty, 0.7);
+    playOneShot(isInteractive ? sndClickInteractive : sndClickEmpty, 0.35);
   });
 
   let scrollSoundCooling = false;
   let scrollSoundTimer = null;
   window.addEventListener('scroll', () => {
     if (!scrollSoundCooling) {
-      playOneShot(sndScroll, 0.5);
+      playOneShot(sndScroll, 0.25);
       scrollSoundCooling = true;
     }
     window.clearTimeout(scrollSoundTimer);
@@ -170,6 +178,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------
+     Hero waveform — generated bars spanning edge-to-text, with a
+     staggered delay per bar so it reads as a travelling wave.
+     ------------------------------------------------------------ */
+  document.querySelectorAll('.hero__wave').forEach((wave) => {
+    const BAR_COUNT = 28;
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const bar = document.createElement('span');
+      bar.style.animationDelay = `${-(i * 0.07)}s`;
+      wave.appendChild(bar);
+    }
+  });
+
+  /* ------------------------------------------------------------
      Hero parallax
      ------------------------------------------------------------ */
   const heroWrap = document.getElementById('heroVideoWrap');
@@ -218,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroRole = document.getElementById('heroRole');
   const aboutRoleWord = document.getElementById('aboutRoleWord');
   const consoleEl = document.querySelector('.console');
+  let refreshCarousel = () => {}; // assigned once the carousel section below sets up
 
   const MODE_COPY = {
     audio: { hero: 'Audio Designer', about: 'Sound Designer' },
@@ -238,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (aboutRoleWord) aboutRoleWord.textContent = MODE_COPY[mode].about;
       if (consoleEl) requestAnimationFrame(() => consoleEl.classList.remove('is-switching'));
       if (updateHash) history.replaceState(null, '', '#' + mode);
+      refreshCarousel();
     };
 
     if (consoleEl && animate && !prefersReducedMotion) {
@@ -261,7 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
   scrambleText(heroRole, MODE_COPY[showcase ? showcase.dataset.mode : 'audio'].hero, 1100);
 
   /* ------------------------------------------------------------
-     Carousel
+     Carousel — slides can be restricted to one tab via
+     data-mode="audio" / data-mode="art"; slides with no data-mode
+     show in both. The set of navigable slides is recomputed
+     whenever the tab changes.
      ------------------------------------------------------------ */
   const track = document.getElementById('carouselTrack');
   const dotsWrap = document.getElementById('carouselDots');
@@ -269,36 +295,64 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextBtn = document.querySelector('.carousel__arrow--next');
 
   if (track) {
-    const slides = Array.from(track.children);
+    const allSlides = Array.from(track.children);
+    let visible = allSlides;
     let current = 0;
 
     const renderDots = () => {
       dotsWrap.innerHTML = '';
-      slides.forEach((_, i) => {
+      visible.forEach((_, i) => {
         const dot = document.createElement('span');
         dot.className = 'dot' + (i === current ? ' is-active' : '');
         dotsWrap.appendChild(dot);
       });
     };
 
-    const goTo = (index) => {
-      current = Math.max(0, Math.min(index, slides.length - 1));
+    const applyPosition = () => {
       track.style.transform = `translateX(-${current * 100}%)`;
       renderDots();
       prevBtn.disabled = current === 0;
-      nextBtn.disabled = current === slides.length - 1;
+      nextBtn.disabled = current === visible.length - 1;
     };
 
-    renderDots();
+    const goTo = (index) => {
+      current = Math.max(0, Math.min(index, visible.length - 1));
+      applyPosition();
+    };
 
-    if (slides.length > 1) {
-      prevBtn.addEventListener('click', () => goTo(current - 1));
-      nextBtn.addEventListener('click', () => goTo(current + 1));
-      goTo(0);
-    } else {
-      prevBtn.disabled = true;
-      nextBtn.disabled = true;
-    }
+    refreshCarousel = () => {
+      const mode = showcase ? showcase.dataset.mode : 'audio';
+      visible = allSlides.filter(s => !s.dataset.mode || s.dataset.mode === mode);
+      allSlides.forEach(s => { s.style.display = visible.includes(s) ? '' : 'none'; });
+      current = 0;
+      applyPosition();
+    };
+
+    prevBtn.addEventListener('click', () => goTo(current - 1));
+    nextBtn.addEventListener('click', () => goTo(current + 1));
+
+    refreshCarousel();
+  }
+
+  /* ------------------------------------------------------------
+     Arcane slide — toggles between two videos ("Final Scene" /
+     "Project File"); pauses whichever one is hidden.
+     ------------------------------------------------------------ */
+  const arcaneSwap = document.getElementById('arcaneSwap');
+  if (arcaneSwap) {
+    const videoA = document.getElementById('arcaneVideoA');
+    const videoB = document.getElementById('arcaneVideoB');
+    const tag = document.getElementById('arcaneMediaTag');
+    let showingA = true;
+    arcaneSwap.addEventListener('click', () => {
+      showingA = !showingA;
+      videoA.classList.toggle('is-active', showingA);
+      videoB.classList.toggle('is-active', !showingA);
+      videoA.hidden = !showingA;
+      videoB.hidden = showingA;
+      if (showingA) videoB.pause(); else videoA.pause();
+      tag.textContent = showingA ? 'Final Scene' : 'Project File';
+    });
   }
 
   /* ------------------------------------------------------------
