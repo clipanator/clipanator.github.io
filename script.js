@@ -12,6 +12,67 @@ document.addEventListener('DOMContentLoaded', () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   /* ------------------------------------------------------------
+     Eased scrolling helper — used by the scroll cue instead of
+     relying on the browser's native smooth-scroll, which can feel
+     abrupt. This eases in and out over a fixed duration.
+     ------------------------------------------------------------ */
+  function smoothScrollTo(targetY, duration = 1000) {
+    const startY = window.scrollY;
+    const diff = targetY - startY;
+    if (prefersReducedMotion) {
+      window.scrollTo(0, targetY);
+      return;
+    }
+    const startTime = performance.now();
+    function step(now) {
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      window.scrollTo(0, startY + diff * eased);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ------------------------------------------------------------
+     Hero scroll cue — click to scroll, or auto-scroll after 5s
+     of inactivity (cancelled the moment the person scrolls or
+     clicks on their own).
+     ------------------------------------------------------------ */
+  const scrollCue = document.getElementById('scrollCue');
+  const workSection = document.getElementById('work');
+
+  if (scrollCue && workSection) {
+    const scrollToWork = () => {
+      const targetY = workSection.getBoundingClientRect().top + window.scrollY;
+      smoothScrollTo(targetY, 1000);
+    };
+
+    scrollCue.addEventListener('click', () => {
+      cancelAutoScroll();
+      scrollToWork();
+    });
+
+    let autoScrollTimer = window.setTimeout(() => {
+      scrollToWork();
+    }, 5000);
+
+    function cancelAutoScroll() {
+      if (autoScrollTimer) {
+        window.clearTimeout(autoScrollTimer);
+        autoScrollTimer = null;
+        window.removeEventListener('scroll', onEarlyScroll);
+        window.removeEventListener('wheel', onEarlyScroll);
+        window.removeEventListener('touchstart', onEarlyScroll);
+      }
+    }
+    function onEarlyScroll() { cancelAutoScroll(); }
+
+    window.addEventListener('scroll', onEarlyScroll, { passive: true });
+    window.addEventListener('wheel', onEarlyScroll, { passive: true });
+    window.addEventListener('touchstart', onEarlyScroll, { passive: true });
+  }
+
+  /* ------------------------------------------------------------
      Hero parallax — the background video scrolls slower than the page
      ------------------------------------------------------------ */
   const heroWrap = document.getElementById('heroVideoWrap');
@@ -34,24 +95,88 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------
-     Tabs — Audio / Art
+     Text scramble — unjumbles a string from random characters.
+     Used for the hero role label on load and whenever it changes.
+     ------------------------------------------------------------ */
+  function scrambleText(el, target, duration = 900) {
+    if (!el) return;
+    if (prefersReducedMotion) {
+      el.textContent = target;
+      return;
+    }
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!<>-_/[]{}=+*^?#';
+    if (el._scrambleFrame) cancelAnimationFrame(el._scrambleFrame);
+    const start = performance.now();
+    const length = target.length;
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const revealCount = Math.floor(progress * length);
+      let out = '';
+      for (let i = 0; i < length; i++) {
+        if (i < revealCount || target[i] === ' ') {
+          out += target[i];
+        } else {
+          out += charset[Math.floor(Math.random() * charset.length)];
+        }
+      }
+      el.textContent = out;
+      if (progress < 1) {
+        el._scrambleFrame = requestAnimationFrame(tick);
+      } else {
+        el.textContent = target;
+      }
+    }
+    el._scrambleFrame = requestAnimationFrame(tick);
+  }
+
+  /* ------------------------------------------------------------
+     Mode switching — Audio / Art tabs drive the background color,
+     the hero role label, the about-section role word, and a soft
+     scale animation on the console so content changes don't snap.
      ------------------------------------------------------------ */
   const showcase = document.querySelector('.showcase');
   const tabs = document.querySelectorAll('.tab');
+  const heroRole = document.getElementById('heroRole');
+  const aboutRoleWord = document.getElementById('aboutRoleWord');
+  const consoleEl = document.querySelector('.console');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const mode = tab.dataset.mode;
-      if (showcase.dataset.mode === mode) return;
+  const MODE_COPY = {
+    audio: { hero: 'Audio Designer', about: 'Sound Designer' },
+    art:   { hero: '3D Artist',      about: 'Game Artist' }
+  };
 
+  function setMode(mode) {
+    if (!showcase || showcase.dataset.mode === mode) return;
+
+    const applyChange = () => {
       showcase.dataset.mode = mode;
       tabs.forEach(t => {
-        const active = t === tab;
+        const active = t.dataset.mode === mode;
         t.classList.toggle('is-active', active);
         t.setAttribute('aria-selected', String(active));
       });
-    });
+      scrambleText(heroRole, MODE_COPY[mode].hero);
+      if (aboutRoleWord) aboutRoleWord.textContent = MODE_COPY[mode].about;
+      if (consoleEl) {
+        requestAnimationFrame(() => consoleEl.classList.remove('is-switching'));
+      }
+    };
+
+    if (consoleEl && !prefersReducedMotion) {
+      consoleEl.classList.add('is-switching');
+      window.setTimeout(applyChange, 220);
+    } else {
+      applyChange();
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => setMode(tab.dataset.mode));
   });
+
+  // Entrance scramble for the hero role label on load.
+  scrambleText(heroRole, MODE_COPY.audio.hero, 1100);
 
   /* ------------------------------------------------------------
      Carousel — supports multiple slides, currently greyed out
@@ -91,55 +216,88 @@ document.addEventListener('DOMContentLoaded', () => {
       nextBtn.addEventListener('click', () => goTo(current + 1));
       goTo(0);
     } else {
-      // Only one project for now — controls stay disabled.
       prevBtn.disabled = true;
       nextBtn.disabled = true;
     }
   }
 
   /* ------------------------------------------------------------
-     Adaptive music fader
-     Crossfades between N audio "state" layers using one slider,
-     mimicking a Wwise-style blend container. All layers stay
-     loaded and time-synced; only their volumes change.
+     Adaptive music — five named states, snap-switched with a
+     short crossfade, driven by a stepped slider. Auto-advances
+     to the next state after 10s of no interaction.
      ------------------------------------------------------------ */
   const musicRoot = document.querySelector('.music');
   if (musicRoot) {
-    const layers = Array.from(musicRoot.querySelectorAll('.music__layer'));
+    const MUSIC_STATES = [
+      { label: 'Main',      src: 'assets/audio/music/layer_1.mp3' },
+      { label: 'Shop',      src: 'assets/audio/music/layer_2.mp3' },
+      { label: 'Boss',      src: 'assets/audio/music/layer_3.mp3' },
+      { label: 'Loading',   src: 'assets/audio/music/layer_4.mp3' },
+      // Only 4 files were provided for 5 states — Game Over reuses
+      // Loading's track for now. Point this at a real layer_5.mp3
+      // once you have one and it'll pick it up automatically.
+      { label: 'Game Over', src: 'assets/audio/music/layer_4.mp3' }
+    ];
+
+    const stateAudios = MUSIC_STATES.map(state => {
+      const audio = new Audio(state.src);
+      audio.loop = true;
+      audio.preload = 'auto';
+      audio.volume = 0;
+      return audio;
+    });
+
     const slider = document.getElementById('musicFader');
     const readout = document.getElementById('musicReadout');
     const playBtn = document.getElementById('musicPlay');
+
+    slider.max = String(MUSIC_STATES.length - 1);
+
+    let activeIndex = 0;
     let isPlaying = false;
-    let syncTimer = null;
+    let idleTimer = null;
+    const IDLE_MS = 10000;
+    const FADE_MS = 400;
 
-    const applyCrossfade = (value) => {
-      if (!layers.length) return;
-      const segments = layers.length - 1;
-      if (segments <= 0) {
-        layers[0].volume = 1;
-        return;
-      }
-      const pos = (value / 100) * segments;
-      const seg = Math.min(Math.floor(pos), segments - 1);
-      const frac = pos - seg;
-
-      layers.forEach((layer, i) => {
-        if (i === seg) layer.volume = 1 - frac;
-        else if (i === seg + 1) layer.volume = frac;
-        else layer.volume = 0;
-      });
-
-      const dominantIndex = frac < 0.5 ? seg : Math.min(seg + 1, segments);
-      const label = layers[dominantIndex].dataset.label || '—';
-      readout.textContent = `${label.toUpperCase()} · ${Math.round(value)}%`;
+    const resetIdleTimer = () => {
+      if (idleTimer) window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        switchState((activeIndex + 1) % MUSIC_STATES.length);
+      }, IDLE_MS);
     };
 
-    applyCrossfade(Number(slider.value));
+    function switchState(newIndex) {
+      if (newIndex === activeIndex) return;
+      const oldAudio = stateAudios[activeIndex];
+      const newAudio = stateAudios[newIndex];
+      activeIndex = newIndex;
+      slider.value = String(newIndex);
+      readout.textContent = MUSIC_STATES[newIndex].label.toUpperCase();
 
-    slider.addEventListener('input', (e) => applyCrossfade(Number(e.target.value)));
+      if (isPlaying) {
+        newAudio.currentTime = 0;
+        newAudio.play().catch(() => {});
+        const start = performance.now();
+        const tick = (now) => {
+          const t = Math.min((now - start) / FADE_MS, 1);
+          oldAudio.volume = 1 - t;
+          newAudio.volume = t;
+          if (t < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            oldAudio.pause();
+            oldAudio.currentTime = 0;
+            oldAudio.volume = 0;
+          }
+        };
+        requestAnimationFrame(tick);
+      }
+      resetIdleTimer();
+    }
 
-    const setPlaying = (playing) => {
-      isPlaying = playing;
+    slider.addEventListener('input', (e) => switchState(Number(e.target.value)));
+
+    const setPlayingUI = (playing) => {
       musicRoot.querySelector('.icon-play').hidden = playing;
       musicRoot.querySelector('.icon-pause').hidden = !playing;
       musicRoot.querySelector('.music__play-label').textContent = playing ? 'Pause theme' : 'Play theme';
@@ -147,35 +305,111 @@ document.addEventListener('DOMContentLoaded', () => {
 
     playBtn.addEventListener('click', () => {
       if (!isPlaying) {
-        layers.forEach(layer => { layer.currentTime = layers[0].currentTime || 0; });
-        Promise.all(layers.map(layer => layer.play().catch(() => {}))).then(() => {
-          setPlaying(true);
-          // Periodically re-sync layers so long loops don't drift apart.
-          syncTimer = window.setInterval(() => {
-            const reference = layers[0].currentTime;
-            layers.forEach(layer => {
-              if (Math.abs(layer.currentTime - reference) > 0.15) {
-                layer.currentTime = reference;
-              }
-            });
-          }, 4000);
-        });
+        const active = stateAudios[activeIndex];
+        active.currentTime = 0;
+        active.volume = 1;
+        active.play().catch(() => {});
+        isPlaying = true;
+        setPlayingUI(true);
       } else {
-        layers.forEach(layer => layer.pause());
-        setPlaying(false);
-        if (syncTimer) window.clearInterval(syncTimer);
+        stateAudios.forEach(a => a.pause());
+        isPlaying = false;
+        setPlayingUI(false);
       }
+      resetIdleTimer();
     });
+
+    readout.textContent = MUSIC_STATES[0].label.toUpperCase();
+    resetIdleTimer();
   }
 
   /* ------------------------------------------------------------
-     SFX list — independent one-shot players
+     SFX list — independent one-shot players with a real,
+     decoded-audio waveform and a playback progress overlay.
      ------------------------------------------------------------ */
-  document.querySelectorAll('.sfx__item').forEach(item => {
+  function buildFallbackHeights(count, seed) {
+    return Array.from({ length: count }, (_, i) =>
+      0.18 + 0.75 * Math.abs(Math.sin(i * 12.9898 + seed * 78.233))
+    );
+  }
+
+  function applyHeights(barGroups, heights) {
+    barGroups.forEach(bars => {
+      bars.forEach((bar, i) => bar.style.setProperty('--h', heights[i].toFixed(3)));
+    });
+  }
+
+  async function buildWaveform(waveformEl, audioEl, seed) {
+    const BAR_COUNT = 28;
+    const groups = Array.from(waveformEl.querySelectorAll('.waveform__bars')).map(container => {
+      container.innerHTML = '';
+      const bars = [];
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const bar = document.createElement('span');
+        bar.className = 'waveform__bar';
+        container.appendChild(bar);
+        bars.push(bar);
+      }
+      return bars;
+    });
+
+    applyHeights(groups, buildFallbackHeights(BAR_COUNT, seed));
+
+    try {
+      const src = audioEl.getAttribute('src');
+      if (!src) return;
+      const response = await fetch(src);
+      if (!response.ok) throw new Error('audio file not found');
+      const arrayBuffer = await response.arrayBuffer();
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const decoded = await ctx.decodeAudioData(arrayBuffer);
+      const raw = decoded.getChannelData(0);
+      const blockSize = Math.max(1, Math.floor(raw.length / BAR_COUNT));
+      const peaks = [];
+      for (let i = 0; i < BAR_COUNT; i++) {
+        let sum = 0;
+        const offset = i * blockSize;
+        for (let j = 0; j < blockSize; j++) {
+          sum += Math.abs(raw[offset + j] || 0);
+        }
+        peaks.push(sum / blockSize);
+      }
+      const max = Math.max(...peaks) || 1;
+      const normalized = peaks.map(p => 0.12 + 0.88 * (p / max));
+      applyHeights(groups, normalized);
+      ctx.close();
+    } catch (err) {
+      // Real audio not available yet — the fallback shape stays in place.
+    }
+  }
+
+  const sfxObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const { waveform, audio, seed } = entry.target._sfxData;
+            buildWaveform(waveform, audio, seed);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '200px' })
+    : null;
+
+  document.querySelectorAll('.sfx__item').forEach((item, index) => {
     const btn = item.querySelector('.sfx__play');
     const audio = item.querySelector('audio');
+    const waveform = item.querySelector('.waveform');
+    const progress = item.querySelector('.waveform__progress');
     const playIcon = btn.querySelector('.icon-play');
     const pauseIcon = btn.querySelector('.icon-pause');
+
+    if (sfxObserver) {
+      item._sfxData = { waveform, audio, seed: index + 1 };
+      sfxObserver.observe(item);
+    } else {
+      buildWaveform(waveform, audio, index + 1);
+    }
 
     const setPlaying = (playing) => {
       btn.classList.toggle('is-playing', playing);
@@ -183,18 +417,33 @@ document.addEventListener('DOMContentLoaded', () => {
       pauseIcon.hidden = !playing;
     };
 
+    const updateProgress = () => {
+      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      progress.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+      if (!audio.paused) requestAnimationFrame(updateProgress);
+    };
+
     btn.addEventListener('click', () => {
       if (audio.paused) {
+        // Stop any other SFX so only one plays at a time.
+        document.querySelectorAll('.sfx__item audio').forEach(other => {
+          if (other !== audio && !other.paused) other.pause();
+        });
         audio.currentTime = 0;
         audio.play().catch(() => {});
         setPlaying(true);
+        requestAnimationFrame(updateProgress);
       } else {
         audio.pause();
         setPlaying(false);
       }
     });
 
-    audio.addEventListener('ended', () => setPlaying(false));
+    audio.addEventListener('ended', () => {
+      setPlaying(false);
+      progress.style.clipPath = 'inset(0 100% 0 0)';
+    });
+    audio.addEventListener('pause', () => setPlaying(false));
   });
 
   /* ------------------------------------------------------------
@@ -216,12 +465,8 @@ document.addEventListener('DOMContentLoaded', () => {
       images[index].classList.add('is-active');
     };
 
-    const start = () => {
-      timer = window.setInterval(advance, intervalMs);
-    };
-    const stop = () => {
-      if (timer) window.clearInterval(timer);
-    };
+    const start = () => { timer = window.setInterval(advance, intervalMs); };
+    const stop = () => { if (timer) window.clearInterval(timer); };
 
     window.setTimeout(start, staggerMs);
     block.addEventListener('mouseenter', stop);

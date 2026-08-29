@@ -21,21 +21,24 @@
   <div class="hero__video-wrap" id="heroVideoWrap">
     <video class="hero__video" autoplay muted loop playsinline preload="auto">
       <source src="assets/video/hero-bg.webm" type="video/webm">
-      <!-- Optional fallback, uncomment and provide an mp4 if you want broader support:
-      <source src="assets/video/hero-bg.mp4" type="video/mp4"> -->
     </video>
     <div class="hero__scrim"></div>
   </div>
 
   <div class="hero__content">
-    <p class="hero__eyebrow">Sound for interactive media</p>
     <h1 class="hero__name">Matt Warner</h1>
-    <p class="hero__role">Audio Designer</p>
+    <p class="hero__role" id="heroRole">Audio Designer</p>
   </div>
 
-  <a class="hero__scrollcue" href="#work" aria-label="Scroll to work">
-    <span class="hero__scrollcue-line"></span>
-  </a>
+  <button class="hero__scrollcue" id="scrollCue" type="button" aria-label="Scroll to work">
+    <span class="scrollcue__ring"></span>
+    <span class="scrollcue__ring"></span>
+    <span class="scrollcue__core">
+      <svg viewBox="0 0 24 12" width="20" height="10" aria-hidden="true">
+        <path d="M2 2c4 6 16 6 20 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </span>
+  </button>
 </header>
 
 <!-- ============================================================
@@ -76,18 +79,16 @@
 
               <!-- ---------- AUDIO MODE CONTENT ---------- -->
               <div class="mode-panel mode-panel--audio">
-                <p class="console__desc">Designed and implemented all audio from scratch using Wwise and Unity.</p>
+                <p class="console__desc">Designed and implemented all audio from scratch using Wwise and Unity. All SFX and Music are high quality and have been mixed and mastered to comply with industry standards.</p>
 
                 <div class="music">
                   <div class="music__head">
-                    <span class="music__label">Adaptive theme</span>
-                    <span class="music__readout" id="musicReadout">CALM · 0%</span>
+                    <span class="music__label">Resultare Theme</span>
+                    <span class="music__readout" id="musicReadout">MAIN</span>
                   </div>
 
                   <div class="fader">
-                    <span class="fader__end">Calm</span>
-                    <input type="range" class="fader__input" id="musicFader" min="0" max="100" value="0" step="1" aria-label="Crossfade the adaptive music between calm and intense states">
-                    <span class="fader__end">Intense</span>
+                    <input type="range" class="fader__input" id="musicFader" min="0" max="4" value="0" step="1" aria-label="Switch the adaptive music state">
                   </div>
 
                   <button class="music__play" id="musicPlay" type="button" aria-label="Play adaptive music">
@@ -95,57 +96,144 @@
                     <svg class="icon-pause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
                     <span class="music__play-label">Play theme</span>
                   </button>
-
-                  <!-- Layers are loaded and crossfaded by script.js. Replace src paths with your stems. -->
-                  <audio class="music__layer" data-label="Calm" src="assets/audio/music/layer-calm.mp3" loop preload="auto"></audio>
-                  <audio class="music__layer" data-label="Building" src="assets/audio/music/layer-mid.mp3" loop preload="auto"></audio>
-                  <audio class="music__layer" data-label="Intense" src="assets/audio/music/layer-intense.mp3" loop preload="auto"></audio>
                 </div>
 
                 <ul class="sfx" id="sfxList">
                   <li class="sfx__item">
-                    <button class="sfx__play" type="button" aria-label="Play sound effect">
-                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-                    </button>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Footsteps — gravel</p>
-                      <p class="sfx__desc">Layered foley with a randomized pitch and grain pass to avoid repetition on long traversal sections.</p>
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
                     </div>
-                    <audio src="assets/audio/sfx/footsteps-gravel.mp3" preload="none"></audio>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Ball_Shoot</p>
+                      <p class="sfx__desc">A bass-heavy shooting sound that plays when the cannon fires a ball.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_1.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
-                    <button class="sfx__play" type="button" aria-label="Play sound effect">
-                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-                    </button>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Impact — heavy</p>
-                      <p class="sfx__desc">Sub-heavy hit built from layered foley, a synthesized low end, and a resonant tail in Wwise.</p>
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
                     </div>
-                    <audio src="assets/audio/sfx/impact-heavy.mp3" preload="none"></audio>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Shop_ItemBuy</p>
+                      <p class="sfx__desc">A synth chime played along coin foley and a long tail that plays when an item is purchased from the shop.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_2.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
-                    <button class="sfx__play" type="button" aria-label="Play sound effect">
-                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-                    </button>
-                    <div class="sfx__text">
-                      <p class="sfx__title">UI — confirm</p>
-                      <p class="sfx__desc">Short, clean confirmation tone tuned to sit above the mix without cutting through the music.</p>
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
                     </div>
-                    <audio src="assets/audio/sfx/ui-confirm.mp3" preload="none"></audio>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Barrier_Break</p>
+                      <p class="sfx__desc">A powerful synth one-shot that plays when the "goop" barrier at the bottom of the screen is destroyed.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_3.mp3" preload="none"></audio>
                   </li>
                   <li class="sfx__item">
-                    <button class="sfx__play" type="button" aria-label="Play sound effect">
-                      <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                      <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-                    </button>
-                    <div class="sfx__text">
-                      <p class="sfx__title">Ambience — wind loop</p>
-                      <p class="sfx__desc">Seamless bed layered from three field recordings, filtered per-area to match interior/exterior spaces.</p>
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
                     </div>
-                    <audio src="assets/audio/sfx/ambience-wind.mp3" preload="none"></audio>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Round_Boss</p>
+                      <p class="sfx__desc">A heavy bass synth paired with glass shattering and a police siren that plays when entering a Boss round.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_4.mp3" preload="none"></audio>
+                  </li>
+                  <li class="sfx__item">
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
+                    </div>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Score_Overload</p>
+                      <p class="sfx__desc">An electric, wooshy chime that the score counter plays when the player's ball achieves an exceedingly high score.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_5.mp3" preload="none"></audio>
+                  </li>
+                  <li class="sfx__item">
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
+                    </div>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Shop_LegendaryAppear</p>
+                      <p class="sfx__desc">A woosh that plays alerting the player that a legendary item appeared in the shop.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_6.mp3" preload="none"></audio>
+                  </li>
+                  <li class="sfx__item">
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
+                    </div>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Ball_Break_Base</p>
+                      <p class="sfx__desc">A popping sound that plays when a ball despawns. Different balls have layers that play on top of this sound that are thematic to their type.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_7.mp3" preload="none"></audio>
+                  </li>
+                  <li class="sfx__item">
+                    <div class="sfx__player">
+                      <button class="sfx__play" type="button" aria-label="Play sound effect">
+                        <svg class="icon-play" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      </button>
+                      <div class="waveform">
+                        <div class="waveform__bars"></div>
+                        <div class="waveform__bars waveform__progress"></div>
+                      </div>
+                    </div>
+                    <div class="sfx__text">
+                      <p class="sfx__title">Menu_Button_Settings_Click</p>
+                      <p class="sfx__desc">A short, cute, and satisfying "click" that plays when clicking on a button in the Settings menu.</p>
+                    </div>
+                    <audio src="assets/audio/sfx/resultare_8.mp3" preload="none"></audio>
                   </li>
                 </ul>
               </div>
@@ -156,61 +244,46 @@
 
                 <div class="art-grid" id="artGrid">
 
-                  <div class="art-block" data-title="Protagonist study" data-desc="Silhouette and color exploration for the lead character across three passes.">
+                  <div class="art-block" data-title="Item Pixel Art" data-desc="Pixel art for items that appear on tokens">
                     <div class="art-block__images">
-                      <img class="art-block__img is-active" src="assets/images/art/protagonist-1.jpg" alt="Protagonist concept, pass one">
-                      <img class="art-block__img" src="assets/images/art/protagonist-2.jpg" alt="Protagonist concept, pass two">
-                      <img class="art-block__img" src="assets/images/art/protagonist-3.jpg" alt="Protagonist concept, pass three">
+                      <img class="art-block__img is-active" src="assets/images/art/item/item1.png" alt="Item Pixel Art">
+                      <img class="art-block__img" src="assets/images/art/item/item2.png" alt="Item Pixel Art">
+                      <img class="art-block__img" src="assets/images/art/item/item3.png" alt="Item Pixel Art">
+                      <img class="art-block__img" src="assets/images/art/item/item4.png" alt="Item Pixel Art">
+                      <img class="art-block__img" src="assets/images/art/item/item5.png" alt="Item Pixel Art">
+                      <img class="art-block__img" src="assets/images/art/item/item6.png" alt="Item Pixel Art">
+                      <img class="art-block__img" src="assets/images/art/item/item7.png" alt="Item Pixel Art">
+                      <img class="art-block__img" src="assets/images/art/item/item8.png" alt="Item Pixel Art">
                     </div>
-                    <span class="art-block__title">Protagonist study</span>
-                    <div class="art-block__overlay"><p>Silhouette and color exploration for the lead character across three passes.</p></div>
+                    <span class="art-block__title">Item Pixel Art</span>
+                    <div class="art-block__overlay"><p>Pixel art for items that appear on tokens</p></div>
                   </div>
 
-                  <div class="art-block" data-title="Environment blockout" data-desc="Grey-box to final pass for the central hub area, built for readable sightlines.">
+                  <div class="art-block" data-title="Cat Skins" data-desc="Custom skins for the cat depending on the selected game mode.">
                     <div class="art-block__images">
-                      <img class="art-block__img is-active" src="assets/images/art/environment-1.jpg" alt="Environment concept, pass one">
-                      <img class="art-block__img" src="assets/images/art/environment-2.jpg" alt="Environment concept, pass two">
+                      <img class="art-block__img is-active" src="assets/images/art/moe/moe1.png" alt="Cat Skins">
+                      <img class="art-block__img" src="assets/images/art/moe/moe2.png" alt="Cat Skins">
+                      <img class="art-block__img" src="assets/images/art/moe/moe3.png" alt="Cat Skins">
+                      <img class="art-block__img" src="assets/images/art/moe/moe4.png" alt="Cat Skins">
                     </div>
-                    <span class="art-block__title">Environment blockout</span>
-                    <div class="art-block__overlay"><p>Grey-box to final pass for the central hub area, built for readable sightlines.</p></div>
+                    <span class="art-block__title">Cat Skins</span>
+                    <div class="art-block__overlay"><p>Custom skins for the cat depending on the selected game mode.</p></div>
                   </div>
 
-                  <div class="art-block" data-title="Pixel art — enemies" data-desc="16x16 enemy sprite set with a shared four-frame walk cycle.">
+                  <div class="art-block" data-title="Gameplay - Shooting" data-desc="Canon model, Peg models, and Net model">
                     <div class="art-block__images">
-                      <img class="art-block__img is-active" src="assets/images/art/pixel-enemies-1.jpg" alt="Pixel art enemy sheet, pass one">
-                      <img class="art-block__img" src="assets/images/art/pixel-enemies-2.jpg" alt="Pixel art enemy sheet, pass two">
-                      <img class="art-block__img" src="assets/images/art/pixel-enemies-3.jpg" alt="Pixel art enemy sheet, pass three">
+                      <img class="art-block__img is-active" src="assets/images/art/1.png" alt="Gameplay - Shooting">
                     </div>
-                    <span class="art-block__title">Pixel art — enemies</span>
-                    <div class="art-block__overlay"><p>16×16 enemy sprite set with a shared four-frame walk cycle.</p></div>
+                    <span class="art-block__title">Gameplay - Shooting</span>
+                    <div class="art-block__overlay"><p>Canon model, Peg models, and Net model</p></div>
                   </div>
 
-                  <div class="art-block" data-title="Prop set" data-desc="Hand-painted texture set for the interior prop kit, built for reuse across three biomes.">
+                  <div class="art-block" data-title="Cat Rig" data-desc="Cat model, rigging, and animations">
                     <div class="art-block__images">
-                      <img class="art-block__img is-active" src="assets/images/art/props-1.jpg" alt="Prop set, pass one">
-                      <img class="art-block__img" src="assets/images/art/props-2.jpg" alt="Prop set, pass two">
+                      <img class="art-block__img is-active" src="assets/images/art/2.png" alt="Cat Rig">
                     </div>
-                    <span class="art-block__title">Prop set</span>
-                    <div class="art-block__overlay"><p>Hand-painted texture set for the interior prop kit, built for reuse across three biomes.</p></div>
-                  </div>
-
-                  <div class="art-block" data-title="Rig & animation" data-desc="Custom biped rig with a stylized secondary-motion pass on cloth and hair.">
-                    <div class="art-block__images">
-                      <img class="art-block__img is-active" src="assets/images/art/rig-1.jpg" alt="Rig and animation, pass one">
-                      <img class="art-block__img" src="assets/images/art/rig-2.jpg" alt="Rig and animation, pass two">
-                      <img class="art-block__img" src="assets/images/art/rig-3.jpg" alt="Rig and animation, pass three">
-                    </div>
-                    <span class="art-block__title">Rig &amp; animation</span>
-                    <div class="art-block__overlay"><p>Custom biped rig with a stylized secondary-motion pass on cloth and hair.</p></div>
-                  </div>
-
-                  <div class="art-block" data-title="Pixel art — UI" data-desc="Low-color UI icon set matched to the game's restricted in-game palette.">
-                    <div class="art-block__images">
-                      <img class="art-block__img is-active" src="assets/images/art/pixel-ui-1.jpg" alt="Pixel UI set, pass one">
-                      <img class="art-block__img" src="assets/images/art/pixel-ui-2.jpg" alt="Pixel UI set, pass two">
-                    </div>
-                    <span class="art-block__title">Pixel art — UI</span>
-                    <div class="art-block__overlay"><p>Low-color UI icon set matched to the game's restricted in-game palette.</p></div>
+                    <span class="art-block__title">Cat Rig</span>
+                    <div class="art-block__overlay"><p>Cat model, rigging, and animations</p></div>
                   </div>
 
                 </div>
@@ -243,29 +316,40 @@
 
     <div class="about__intro">
       <p class="section-eyebrow">About</p>
-      <h2 class="about__heading">Ten years of making games sound like they feel.</h2>
+      <h2 class="about__heading">Hi 👋, I'm Matt Warner, a <span id="aboutRoleWord">Sound Designer</span> from Ottawa, Ontario</h2>
       <p class="about__bio">
-        I'm an audio designer working across sound design, implementation, and music for interactive
-        media. I care most about the moment sound and gameplay stop feeling like separate layers —
-        where a footstep, a hit, or a swell in the score reads as one system instead of a mix of
-        assets. Edit this paragraph with your own bio.
+        I started my career learning VFX for film and television, but found my niche when exploring
+        audio. I love diving deep into the technical aspects of different software.
       </p>
     </div>
 
     <div class="about__skills">
       <p class="section-eyebrow">Skills</p>
       <ul class="chips">
-        <li class="chip">Wwise</li>
-        <li class="chip">FMOD</li>
+        <li class="chip chip--audio">Wwise</li>
+        <li class="chip chip--audio">Sound Design</li>
+        <li class="chip chip--audio">Digital Synthesis</li>
+        <li class="chip chip--audio">SSL Console</li>
+        <li class="chip chip--audio">Dynamic/Adaptive Music</li>
+        <li class="chip chip--audio">Foley</li>
+        <li class="chip chip--audio">Field Recording</li>
+        <li class="chip chip--audio">Pro Tools</li>
+        <li class="chip chip--audio">FL Studio</li>
+        <li class="chip chip--audio">Logic</li>
+        <li class="chip chip--audio">Ableton Live</li>
+        <li class="chip chip--audio">Reaper</li>
+        <li class="chip chip--audio">Audition</li>
+        <li class="chip chip--art">Maya</li>
+        <li class="chip chip--art">3ds Max</li>
+        <li class="chip chip--art">Revit</li>
+        <li class="chip chip--art">Houdini</li>
+        <li class="chip chip--art">Photoshop</li>
+        <li class="chip chip--art">Premiere Pro</li>
+        <li class="chip chip--art">After Effects</li>
+        <li class="chip chip--art">Illustrator</li>
+        <li class="chip chip--art">Substance Painter</li>
         <li class="chip">Unity</li>
         <li class="chip">Unreal Engine</li>
-        <li class="chip">Pro Tools</li>
-        <li class="chip">Reaper</li>
-        <li class="chip">Sound Design</li>
-        <li class="chip">Dynamic / Adaptive Music</li>
-        <li class="chip">Foley</li>
-        <li class="chip">Field Recording</li>
-        <li class="chip">C# Audio Scripting</li>
       </ul>
     </div>
 
@@ -273,35 +357,34 @@
       <p class="section-eyebrow">History</p>
       <ul class="log">
         <li class="log__row">
-          <span class="log__time">2024 — Now</span>
+          <span class="log__time">Aug 2023</span>
           <div class="log__text">
-            <p class="log__role">Audio Designer, Freelance</p>
-            <p class="log__place">Independent contracts across sound design and implementation.</p>
+            <p class="log__role">Music Industry Arts (Honours)</p>
+            <p class="log__place">Algonquin College of Applied Arts and Technology</p>
           </div>
         </li>
         <li class="log__row">
-          <span class="log__time">2021 — 2024</span>
+          <span class="log__time">Present</span>
           <div class="log__text">
-            <p class="log__role">Sound Designer, Studio Name</p>
-            <p class="log__place">Shipped audio for two titles, owned Wwise integration end to end.</p>
+            <p class="log__role">Game Art</p>
+            <p class="log__place">Algonquin College of Applied Arts and Technology</p>
           </div>
         </li>
         <li class="log__row">
-          <span class="log__time">2019 — 2021</span>
+          <span class="log__time">Dec 2024 — Present</span>
           <div class="log__text">
-            <p class="log__role">Junior Audio Designer, Studio Name</p>
-            <p class="log__place">SFX creation, foley recording, and mix support.</p>
+            <p class="log__role">Audio Designer (Lead) — Resultare</p>
+            <p class="log__place">Good Day Games</p>
           </div>
         </li>
         <li class="log__row">
-          <span class="log__time">2019</span>
+          <span class="log__time">Sep 2023 — Present</span>
           <div class="log__text">
-            <p class="log__role">B.A., Sound &amp; Music Production</p>
-            <p class="log__place">School Name</p>
+            <p class="log__role">Lead Event Technician</p>
+            <p class="log__place">Encore Global</p>
           </div>
         </li>
       </ul>
-      <p class="about__edit-note">Replace the entries above with your own history.</p>
     </div>
 
   </div>
@@ -313,14 +396,12 @@
 <footer class="footer" id="contact">
   <div class="footer__inner">
     <p class="section-eyebrow section-eyebrow--inverse">Get in touch</p>
-    <h2 class="footer__heading">Let's make something sound right.</h2>
-    <a class="footer__email" href="mailto:hello@mattwarner.audio">hello@mattwarner.audio</a>
+    <h2 class="footer__heading">Contact Information:</h2>
+    <a class="footer__email" href="mailto:matthewfw@live.com">matthewfw@live.com</a>
 
     <div class="footer__links">
-      <a href="#" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="#" target="_blank" rel="noopener">GitHub</a>
-      <a href="#" target="_blank" rel="noopener">Itch.io</a>
-      <a href="#" target="_blank" rel="noopener">SoundCloud</a>
+      <a href="https://www.linkedin.com/in/matt-warner-3b6315198/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://open.spotify.com/artist/1xlcv6ZdoiTk5F6H9MruxE" target="_blank" rel="noopener">Spotify</a>
     </div>
 
     <p class="footer__copy">© <span id="year"></span> Matt Warner. Built for GitHub Pages.</p>
