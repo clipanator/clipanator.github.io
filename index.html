@@ -43,7 +43,7 @@
   </div>
 
   <div class="hero__content">
-    <p class="hero__eyebrow">3D Modeling, Texturing, Animation, Pixel art</p>
+    <p class="hero__eyebrow" id="heroEyebrow">Sound Design, Music, Wwise, Mixing, Mastering</p>
     <div class="hero__namerow">
       <div class="hero__wave" aria-hidden="true"></div>
       <h1 class="hero__name">Matt Warner</h1>
@@ -77,9 +77,13 @@
     </button>
   </nav>
 
+  <div class="carousel__dots carousel__dots--top" id="carouselDotsTop" aria-hidden="true">
+    <span class="dot is-active"></span>
+  </div>
+
   <div class="carousel">
     <button class="carousel__arrow carousel__arrow--prev" type="button" disabled aria-label="Previous project">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
 
     <div class="carousel__viewport">
@@ -90,10 +94,17 @@
           <div class="console">
 
             <div class="console__media">
-              <video class="console__video" muted loop playsinline preload="metadata" autoplay>
+              <video class="console__video" id="resultareTrailer" muted loop playsinline preload="metadata" autoplay>
                 <source src="assets/video/resultare-trailer.webm" type="video/webm">
               </video>
               <span class="console__media-tag">Gameplay trailer</span>
+              <div class="media-volume">
+                <button class="media-volume__btn" id="trailerMuteBtn" type="button" aria-label="Unmute trailer">
+                  <svg class="icon-muted" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+                  <svg class="icon-unmuted" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" hidden><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+                </button>
+                <input type="range" class="media-volume__slider" id="trailerVolume" min="0" max="100" value="60" aria-label="Trailer volume">
+              </div>
             </div>
 
             <div class="console__body">
@@ -112,12 +123,18 @@
                     <span class="music__readout" id="musicReadout">MAIN</span>
                   </div>
 
-                  <div class="fader">
-                    <input type="range" class="fader__input" id="musicFader" min="0" max="4" value="0" step="1" aria-label="Switch the adaptive music state">
-                    <div class="fader__track" aria-hidden="true">
-                      <div class="fader__fill" id="faderFill"></div>
-                      <div class="fader__thumb" id="faderThumb"></div>
-                    </div>
+                  <div class="fader" id="musicFader" role="slider" tabindex="0" aria-label="Switch the adaptive music state" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-valuetext="Main">
+                    <div class="fader__line"></div>
+                    <div class="fader__fill" id="faderFill"></div>
+                    <span class="fader__node" style="left:0%"></span>
+                    <span class="fader__node" style="left:25%"></span>
+                    <span class="fader__node" style="left:50%"></span>
+                    <span class="fader__node" style="left:75%"></span>
+                    <span class="fader__node" style="left:100%"></span>
+                    <div class="fader__thumb" id="faderThumb"></div>
+                  </div>
+                  <div class="fader__labels" aria-hidden="true">
+                    <span>Main</span><span>Shop</span><span>Boss</span><span>Loading</span><span>Game Over</span>
                   </div>
 
                   <button class="music__play" id="musicPlay" type="button" aria-label="Play adaptive music">
@@ -344,12 +361,13 @@
               <video class="console__video" id="arcaneVideoB" controls playsinline preload="metadata" hidden>
                 <source src="assets/video/arcane-project-file.mp4" type="video/mp4">
               </video>
-              <button class="media-swap" id="arcaneSwap" type="button" aria-label="Switch to the other video">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4M3 12v-2a4 4 0 014-4h14M7 22l-4-4 4-4M21 12v2a4 4 0 01-4 4H3"/></svg>
-              </button>
               <span class="console__media-tag" id="arcaneMediaTag">Final Scene</span>
             </div>
             <div class="console__body">
+              <button class="media-swap-below" id="arcaneSwap" type="button">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4M3 12v-2a4 4 0 014-4h14M7 22l-4-4 4-4M21 12v2a4 4 0 01-4 4H3"/></svg>
+                <span id="arcaneSwapLabel">Switch to Project File</span>
+              </button>
               <div class="console__title-row">
                 <h2 class="console__title">Arcane Sound Re-Design</h2>
                 <span class="console__year">2026</span>
@@ -366,7 +384,7 @@
     </div>
 
     <button class="carousel__arrow carousel__arrow--next" type="button" disabled aria-label="Next project">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
     </button>
   </div>
 
@@ -384,6 +402,7 @@
     <div class="about__intro">
       <p class="section-eyebrow">About</p>
       <h2 class="about__heading">Hi 👋, I'm Matt Warner, a <span id="aboutRoleWord">Sound Designer</span> from Ottawa, Ontario</h2>
+      <img class="about__photo" src="assets/images/matt-warner-photo.jpg" alt="Matt Warner">
       <p class="about__bio">
         I'm a game audio designer specializing in sound design, interactive music, and technical audio
         implementation. I started my career learning VFX for film and television, but found my niche

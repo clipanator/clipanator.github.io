@@ -178,16 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------
-     Hero waveform — generated bars spanning edge-to-text, with a
-     staggered delay per bar so it reads as a travelling wave.
+     Hero wave — a genuine sine wave (SVG), tiled twice and
+     scrolled sideways forever for a seamless travelling motion.
      ------------------------------------------------------------ */
-  document.querySelectorAll('.hero__wave').forEach((wave) => {
-    const BAR_COUNT = 28;
-    for (let i = 0; i < BAR_COUNT; i++) {
-      const bar = document.createElement('span');
-      bar.style.animationDelay = `${-(i * 0.07)}s`;
-      wave.appendChild(bar);
+  function buildWavePath(width, height, cycles, amplitude, steps) {
+    const midY = height / 2;
+    let d = '';
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * width;
+      const y = midY + Math.sin((i / steps) * Math.PI * 2 * cycles) * amplitude;
+      d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
     }
+    return d.trim();
+  }
+  document.querySelectorAll('.hero__wave').forEach((wave) => {
+    const segment = 800, height = 34, cycles = 5, amplitude = 8;
+    const d = buildWavePath(segment * 2, height, cycles * 2, amplitude, 160);
+    wave.innerHTML = `<svg class="hero__wave-svg" viewBox="0 0 ${segment * 2} ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>`;
   });
 
   /* ------------------------------------------------------------
@@ -237,13 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const showcase = document.querySelector('.showcase');
   const tabs = document.querySelectorAll('.tab');
   const heroRole = document.getElementById('heroRole');
+  const heroEyebrow = document.getElementById('heroEyebrow');
   const aboutRoleWord = document.getElementById('aboutRoleWord');
   const consoleEl = document.querySelector('.console');
   let refreshCarousel = () => {}; // assigned once the carousel section below sets up
 
   const MODE_COPY = {
-    audio: { hero: 'Audio Designer', about: 'Sound Designer' },
-    art:   { hero: 'Game Artist',    about: 'Game Artist' }
+    audio: { hero: 'Audio Designer', about: 'Sound Designer', eyebrow: 'Sound Design, Music, Wwise, Mixing, Mastering' },
+    art:   { hero: 'Game Artist',    about: 'Game Artist',    eyebrow: '3D Modeling, Texturing, Animation, Pixel art' }
   };
 
   function setMode(mode, { animate = true, updateHash = true } = {}) {
@@ -257,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         t.setAttribute('aria-selected', String(active));
       });
       scrambleText(heroRole, MODE_COPY[mode].hero);
+      if (heroEyebrow) heroEyebrow.textContent = MODE_COPY[mode].eyebrow;
       if (aboutRoleWord) aboutRoleWord.textContent = MODE_COPY[mode].about;
       if (consoleEl) requestAnimationFrame(() => consoleEl.classList.remove('is-switching'));
       if (updateHash) history.replaceState(null, '', '#' + mode);
@@ -291,21 +300,30 @@ document.addEventListener('DOMContentLoaded', () => {
      ------------------------------------------------------------ */
   const track = document.getElementById('carouselTrack');
   const dotsWrap = document.getElementById('carouselDots');
+  const dotsWrapTop = document.getElementById('carouselDotsTop');
   const prevBtn = document.querySelector('.carousel__arrow--prev');
   const nextBtn = document.querySelector('.carousel__arrow--next');
+  const viewport = document.querySelector('.carousel__viewport');
 
   if (track) {
     const allSlides = Array.from(track.children);
     let visible = allSlides;
     let current = 0;
 
-    const renderDots = () => {
-      dotsWrap.innerHTML = '';
+    const renderDotsInto = (wrap) => {
+      if (!wrap) return;
+      wrap.innerHTML = '';
       visible.forEach((_, i) => {
         const dot = document.createElement('span');
         dot.className = 'dot' + (i === current ? ' is-active' : '');
-        dotsWrap.appendChild(dot);
+        wrap.appendChild(dot);
       });
+    };
+    const renderDots = () => { renderDotsInto(dotsWrap); renderDotsInto(dotsWrapTop); };
+
+    const updateViewportHeight = () => {
+      const activeSlide = visible[current];
+      if (viewport && activeSlide) viewport.style.height = activeSlide.scrollHeight + 'px';
     };
 
     const applyPosition = () => {
@@ -313,6 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderDots();
       prevBtn.disabled = current === 0;
       nextBtn.disabled = current === visible.length - 1;
+      updateViewportHeight();
     };
 
     const goTo = (index) => {
@@ -331,27 +350,55 @@ document.addEventListener('DOMContentLoaded', () => {
     prevBtn.addEventListener('click', () => goTo(current - 1));
     nextBtn.addEventListener('click', () => goTo(current + 1));
 
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(updateViewportHeight, 150);
+    });
+
+    // Re-measure if content inside the active slide changes size for any
+    // other reason (fonts loading, images loading in, etc).
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => updateViewportHeight());
+      allSlides.forEach(s => ro.observe(s));
+    }
+
     refreshCarousel();
   }
 
   /* ------------------------------------------------------------
      Arcane slide — toggles between two videos ("Final Scene" /
-     "Project File"); pauses whichever one is hidden.
+     "Project File") with a slide transition; pauses whichever
+     one is hidden, and the button always names the OTHER video.
      ------------------------------------------------------------ */
   const arcaneSwap = document.getElementById('arcaneSwap');
   if (arcaneSwap) {
     const videoA = document.getElementById('arcaneVideoA');
     const videoB = document.getElementById('arcaneVideoB');
     const tag = document.getElementById('arcaneMediaTag');
+    const label = document.getElementById('arcaneSwapLabel');
     let showingA = true;
+
     arcaneSwap.addEventListener('click', () => {
+      const from = showingA ? videoA : videoB;
+      const to = showingA ? videoB : videoA;
+
+      to.hidden = false;
+      to.classList.remove('is-leaving');
+      from.classList.remove('is-active');
+      from.classList.add('is-leaving');
+
+      requestAnimationFrame(() => { to.classList.add('is-active'); });
+
+      window.setTimeout(() => {
+        from.hidden = true;
+        from.classList.remove('is-leaving');
+        from.pause();
+      }, 520);
+
       showingA = !showingA;
-      videoA.classList.toggle('is-active', showingA);
-      videoB.classList.toggle('is-active', !showingA);
-      videoA.hidden = !showingA;
-      videoB.hidden = showingA;
-      if (showingA) videoB.pause(); else videoA.pause();
       tag.textContent = showingA ? 'Final Scene' : 'Project File';
+      label.textContent = showingA ? 'Switch to Project File' : 'Switch to Final Scene';
     });
   }
 
@@ -380,18 +427,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return audio;
     });
 
-    const slider = document.getElementById('musicFader');
+    const faderEl = document.getElementById('musicFader');
     const readout = document.getElementById('musicReadout');
     const playBtn = document.getElementById('musicPlay');
     const fill = document.getElementById('faderFill');
     const thumb = document.getElementById('faderThumb');
 
-    slider.max = String(MUSIC_STATES.length - 1);
-
     let activeIndex = 0;
     let isPlaying = false;
     let idleTimer = null;
     let syncTimer = null;
+    let dragging = false;
     const IDLE_MS = 10000;
     const FADE_MS = 400;
 
@@ -399,16 +445,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const pct = (index / (MUSIC_STATES.length - 1)) * 100;
       fill.style.width = pct + '%';
       thumb.style.left = pct + '%';
+      faderEl.setAttribute('aria-valuenow', String(index));
+      faderEl.setAttribute('aria-valuetext', MUSIC_STATES[index].label);
     };
-
-    ['pointerdown', 'touchstart'].forEach(evt => slider.addEventListener(evt, () => {
-      fill.classList.add('no-anim');
-      thumb.classList.add('no-anim');
-    }));
-    ['pointerup', 'touchend', 'mouseup'].forEach(evt => window.addEventListener(evt, () => {
-      fill.classList.remove('no-anim');
-      thumb.classList.remove('no-anim');
-    }));
 
     // Set the initial position without animating in.
     fill.classList.add('no-anim'); thumb.classList.add('no-anim');
@@ -425,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchState(newIndex) {
       if (newIndex === activeIndex) return;
       activeIndex = newIndex;
-      slider.value = String(newIndex);
       updateSliderVisual(newIndex);
       readout.textContent = MUSIC_STATES[newIndex].label.toUpperCase();
       if (isPlaying) {
@@ -434,7 +472,39 @@ document.addEventListener('DOMContentLoaded', () => {
       resetIdleTimer();
     }
 
-    slider.addEventListener('input', (e) => switchState(Number(e.target.value)));
+    // Fully custom pointer-driven control (no native <input>): dragging
+    // anywhere on the track jumps straight to the nearest state and
+    // tracks the pointer live; a plain click/tap does the same in one step.
+    function indexFromClientX(clientX) {
+      const rect = faderEl.getBoundingClientRect();
+      const fraction = rect.width ? Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) : 0;
+      return Math.round(fraction * (MUSIC_STATES.length - 1));
+    }
+
+    faderEl.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      fill.classList.add('no-anim'); thumb.classList.add('no-anim');
+      try { faderEl.setPointerCapture(e.pointerId); } catch (err) {}
+      switchState(indexFromClientX(e.clientX));
+    });
+    faderEl.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      switchState(indexFromClientX(e.clientX));
+    });
+    const endDrag = () => {
+      if (!dragging) return;
+      dragging = false;
+      fill.classList.remove('no-anim'); thumb.classList.remove('no-anim');
+    };
+    faderEl.addEventListener('pointerup', endDrag);
+    faderEl.addEventListener('pointercancel', endDrag);
+
+    faderEl.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { switchState(Math.min(activeIndex + 1, MUSIC_STATES.length - 1)); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { switchState(Math.max(activeIndex - 1, 0)); e.preventDefault(); }
+      else if (e.key === 'Home') { switchState(0); e.preventDefault(); }
+      else if (e.key === 'End') { switchState(MUSIC_STATES.length - 1); e.preventDefault(); }
+    });
 
     const setPlayingUI = (playing) => {
       musicRoot.querySelector('.icon-play').hidden = playing;
@@ -465,6 +535,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     readout.textContent = MUSIC_STATES[0].label.toUpperCase();
     resetIdleTimer();
+  }
+
+  /* ------------------------------------------------------------
+     Gameplay trailer — mute toggle + volume slider, wired into
+     the same master-volume/ducking bus as everything else.
+     ------------------------------------------------------------ */
+  const trailerVideo = document.getElementById('resultareTrailer');
+  const trailerMuteBtn = document.getElementById('trailerMuteBtn');
+  const trailerVolumeSlider = document.getElementById('trailerVolume');
+  if (trailerVideo && trailerMuteBtn && trailerVolumeSlider) {
+    manage(trailerVideo, Number(trailerVolumeSlider.value) / 100);
+
+    const setMuteUI = (muted) => {
+      trailerMuteBtn.querySelector('.icon-muted').hidden = !muted;
+      trailerMuteBtn.querySelector('.icon-unmuted').hidden = muted;
+    };
+    setMuteUI(trailerVideo.muted);
+
+    const updateAudibility = () => {
+      const audible = !trailerVideo.paused && !trailerVideo.muted && trailerVideo.volume > 0;
+      if (audible) activeForeground.add(trailerVideo); else activeForeground.delete(trailerVideo);
+      duckAmbient();
+    };
+    trailerVideo.addEventListener('volumechange', updateAudibility);
+    trailerVideo.addEventListener('play', updateAudibility);
+    trailerVideo.addEventListener('pause', updateAudibility);
+
+    trailerMuteBtn.addEventListener('click', () => {
+      trailerVideo.muted = !trailerVideo.muted;
+      setMuteUI(trailerVideo.muted);
+    });
+    trailerVolumeSlider.addEventListener('input', (e) => {
+      const value = Number(e.target.value);
+      manage(trailerVideo, value / 100);
+      if (trailerVideo.muted && value > 0) { trailerVideo.muted = false; setMuteUI(false); }
+    });
   }
 
   /* ------------------------------------------------------------
