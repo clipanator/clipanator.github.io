@@ -26,7 +26,9 @@
 
 <div class="master-volume">
   <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
-  <input type="range" id="masterVolume" min="0" max="100" value="60" aria-label="Master site volume">
+  <div class="master-volume__slider-wrap">
+    <input type="range" id="masterVolume" min="0" max="100" value="60" aria-label="Master site volume" aria-orientation="vertical">
+  </div>
 </div>
 
 <!-- ============================================================
@@ -115,7 +117,8 @@
 
               <!-- ---------- AUDIO MODE CONTENT ---------- -->
               <div class="mode-panel mode-panel--audio">
-                <p class="console__desc">Designed and implemented all audio from scratch using Wwise and Unity. All SFX and Music are high quality and have been mixed and mastered to comply with industry standards.</p>
+                <p class="console__desc">Designed and implemented all audio from scratch using Wwise and Unity. All SFX and Music are 24 bit, 48khz .WAVs and have been mixed and mastered to comply with industry standards. The music was made to play with the same theme and arrangement throughout the game, but to dynamically change its style depending on what the player is doing. I also thought it would be fun to use the infamous "Meowsynth" VST for the main theme due to the mascot being a cat.</p>
+                <p class="console__desc">A lot of the SFX are re-sampled and use instances of Foley and Serum. The menu sounds take heavy inspiration from the Nintendo Switch menu sounds, and I wanted to emulate the cute, satisfying clicks and bloops. I also used sounds from popular games like Fortnite, League of Legends, and Super Smash Bros. Ultimate for reference on how they achieved different moods with their layers (Shop_LegendaryAppear takes inspiration from League's "Youmuu's Ghostblade" activate sound as an obvious example).</p>
 
                 <div class="music">
                   <div class="music__head">
@@ -372,13 +375,59 @@
                 <h2 class="console__title">Arcane Sound Re-Design</h2>
                 <span class="console__year">2026</span>
               </div>
-              <p class="console__desc">A sound re-design for a scene in the TV Series Arcane.</p>
+              <p class="console__desc">A sound re-design for a scene in the TV Series Arcane. I used a combination of Foley and synthesis (mainly Serum 2), inside FL Studio 2026.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ============ SLIDE 3 : ORIGINAL MUSIC (Audio tab only) ============ -->
+        <article class="slide" data-index="2" data-mode="audio">
+          <div class="console">
+            <div class="console__body">
+              <div class="console__title-row">
+                <h2 class="console__title">Original Music</h2>
+                <span class="console__year">2024-Now</span>
+              </div>
+              <p class="console__desc">In my spare time, I like to make Electronic music. I enjoy synthesizing my own sounds from scratch, and with every new song I push myself by experimenting with new techniques. I find that there are a lot of transferable skills when sound designing for Game SFX or Music, and I find myself using the tools I learn doing one in the other. When designing the sounds for Resultare, I would pretty regularly resample patches I made in Serum. For example, the Round_Boss sound features a heavily altered bass hit, and Ball_Break_Base uses a downlifter that I like to use in a lot of my songs for texture.</p>
+              <p class="console__desc">I started creating music back in High School when a friend of mine showed me the process of making hip-hop beats. The simplicity of these beats really helped me get a grasp on the fundamentals when creating music and working in a DAW. The workspace of choice was FL Studio, and although I've learnt how to use many other DAWs (Pro Tools, Ableton, Logic Pro, Reaper, and Audition), I've stuck with FL as my main out of familiarity. I've found that most DAWs can let you achieve the same end goal; it's just the tools and workflow that differ.</p>
+              <p class="console__desc">I took a program called Music Industry Arts in college, which gave me insight into both audio engineering and the music industry. After graduating, I got a job at Encore operating live sound and video equipment for events. While doing both, I continued learning and experimenting with sound design on my own.</p>
+
+              <div class="streaming">
+                <p class="streaming__label">Listen as Matt.Clip</p>
+                <div class="streaming__embed">
+                  <iframe src="https://open.spotify.com/embed/artist/1xlcv6ZdoiTk5F6H9MruxE?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Matt.Clip on Spotify"></iframe>
+                </div>
+                <div class="streaming__links">
+                  <a href="#" target="_blank" rel="noopener">Apple Music</a>
+                  <a href="#" target="_blank" rel="noopener">YouTube Music</a>
+                  <a href="#" target="_blank" rel="noopener">SoundCloud</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ============ SLIDE 4 : SHOWREEL (Art tab only) ============ -->
+        <article class="slide" data-index="3" data-mode="art">
+          <div class="console">
+            <div class="console__media console__media--player">
+              <video class="console__video is-active" id="showreelVideo" controls playsinline preload="metadata">
+                <source src="assets/video/showreel.mp4" type="video/mp4">
+              </video>
+              <span class="console__media-tag">Showreel</span>
+            </div>
+            <div class="console__body">
+              <div class="console__title-row">
+                <h2 class="console__title">Showreel</h2>
+                <span class="console__year">2022</span>
+              </div>
+              <p class="console__desc">My showreel showing my skills in Motion Graphics, 3D Modeling, Animation, and Simulations.</p>
             </div>
           </div>
         </article>
         <!-- To add another game to the main carousel, duplicate the Resultare <article class="slide">
              block (no data-mode attribute = shows in both tabs). Add data-mode="audio" or
-             data-mode="art" to restrict a slide to one tab, as done above for the Arcane slide. -->
+             data-mode="art" to restrict a slide to one tab, as done above. -->
 
       </div>
     </div>
@@ -406,10 +455,40 @@
       <p class="about__bio">
         I'm a game audio designer specializing in sound design, interactive music, and technical audio
         implementation. I started my career learning VFX for film and television, but found my niche
-        when exploring audio. I'm extremely passionate about all things audio and have skills in VFX,
-        motion graphics, 3D modeling, and 3D animation as well. I love diving deep into the technical
-        aspects of different software.
+        when exploring audio design. I'm extremely passionate about all things audio and have skills in
+        VFX, motion graphics, 3D modeling, and 3D animation as well. I love diving deep into the
+        technical aspects of different software.
       </p>
+      <p class="about__bio">
+        I got my start in audio in High School, when I was introduced to beat-making in FL Studio.
+        Quickly, I transitioned from making cookie-cutter hip-hop beats to diving deep into synthesis,
+        field recording, and sound design. I graduated from college with an audio engineering diploma
+        with Honours and got a job in the live scene, providing audio and video services for events.
+      </p>
+      <p class="about__bio">
+        Since graduating, I have had an interest in designing audio for video games. In 2024, I
+        approached a friend who had graduated from a game development program with an idea for a
+        portfolio piece: a Peggle-inspired roguelike game. Originally supposed to be a game jam project,
+        we quickly realized that the concept was too good to scrap, and we invited two other developers
+        to hop on board. Some time later, we released the game on Steam with high praise from those who
+        played. Turning the smaller project into one with a clear timeline was extremely valuable in
+        learning how to do things properly, with deadlines, file management, organization, and working
+        in a larger team.
+      </p>
+    </div>
+
+    <div class="about__games">
+      <p class="section-eyebrow">Favourite Games</p>
+      <p class="about__games-note">Outer Wilds is always going to be #1 — and for sound design specifically, nothing beats Return of the Obra Dinn.</p>
+      <ul class="chips">
+        <li class="chip">Outer Wilds</li>
+        <li class="chip">Counter-Strike 2</li>
+        <li class="chip">Celeste</li>
+        <li class="chip">Blue Prince</li>
+        <li class="chip">The Binding of Isaac</li>
+        <li class="chip">Return of the Obra Dinn</li>
+        <li class="chip">League of Legends</li>
+      </ul>
     </div>
 
     <div class="about__skills">

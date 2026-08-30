@@ -178,22 +178,34 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------------------------------------------
-     Hero wave — a genuine sine wave (SVG), tiled twice and
-     scrolled sideways forever for a seamless travelling motion.
+     Hero wave — an irregular, organic wave (several sine
+     components summed together, like a real audio waveform)
+     tiled twice and scrolled sideways forever, seamlessly.
      ------------------------------------------------------------ */
-  function buildWavePath(width, height, cycles, amplitude, steps) {
+  function buildHeroWavePath(totalWidth, height, steps, seed) {
     const midY = height / 2;
+    // Each "cycles" value must be a whole number of cycles across the full
+    // (doubled) width, so the tiled copy lines up seamlessly when scrolled.
+    const components = [
+      { cycles: 4, amp: 0.5, phase: seed * 2.1 },
+      { cycles: 9, amp: 0.25, phase: seed * 4.4 + 1.5 },
+      { cycles: 2, amp: 1.0, phase: seed * 0.8 }
+    ];
+    const maxAmp = components.reduce((s, c) => s + c.amp, 0);
     let d = '';
     for (let i = 0; i <= steps; i++) {
-      const x = (i / steps) * width;
-      const y = midY + Math.sin((i / steps) * Math.PI * 2 * cycles) * amplitude;
+      const t = i / steps;
+      const x = t * totalWidth;
+      let y = 0;
+      components.forEach(c => { y += Math.sin(t * Math.PI * 2 * c.cycles + c.phase) * c.amp; });
+      y = midY + (y / maxAmp) * (height * 0.45);
       d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
     }
     return d.trim();
   }
-  document.querySelectorAll('.hero__wave').forEach((wave) => {
-    const segment = 800, height = 34, cycles = 5, amplitude = 8;
-    const d = buildWavePath(segment * 2, height, cycles * 2, amplitude, 160);
+  document.querySelectorAll('.hero__wave').forEach((wave, idx) => {
+    const segment = 800, height = 34;
+    const d = buildHeroWavePath(segment * 2, height, 220, idx + 1);
     wave.innerHTML = `<svg class="hero__wave-svg" viewBox="0 0 ${segment * 2} ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>`;
   });
 
@@ -291,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   scrambleText(heroRole, MODE_COPY[showcase ? showcase.dataset.mode : 'audio'].hero, 1100);
+  scrambleText(heroEyebrow, MODE_COPY[showcase ? showcase.dataset.mode : 'audio'].eyebrow, 1100);
 
   /* ------------------------------------------------------------
      Carousel — slides can be restricted to one tab via
@@ -304,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const prevBtn = document.querySelector('.carousel__arrow--prev');
   const nextBtn = document.querySelector('.carousel__arrow--next');
   const viewport = document.querySelector('.carousel__viewport');
+  const carouselEl = document.querySelector('.carousel');
 
   if (track) {
     const allSlides = Array.from(track.children);
@@ -329,13 +343,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyPosition = () => {
       track.style.transform = `translateX(-${current * 100}%)`;
       renderDots();
-      prevBtn.disabled = current === 0;
-      nextBtn.disabled = current === visible.length - 1;
+      const canNavigate = visible.length > 1;
+      prevBtn.disabled = !canNavigate;
+      nextBtn.disabled = !canNavigate;
       updateViewportHeight();
     };
 
+    // Navigation loops: past the last slide wraps to the first, and vice versa.
     const goTo = (index) => {
-      current = Math.max(0, Math.min(index, visible.length - 1));
+      const count = visible.length;
+      current = ((index % count) + count) % count;
       applyPosition();
     };
 
@@ -349,6 +366,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     prevBtn.addEventListener('click', () => goTo(current - 1));
     nextBtn.addEventListener('click', () => goTo(current + 1));
+
+    // Arrows float fixed in the viewport (vertically centered) so they never
+    // get lost while scrolling through a tall slide, but stay horizontally
+    // confined just outside/inside the carousel block's own edges.
+    const positionArrows = () => {
+      if (!carouselEl) return;
+      const rect = carouselEl.getBoundingClientRect();
+      const gap = 14;
+      const prevLeft = Math.max(8, rect.left - gap - prevBtn.offsetWidth);
+      const nextLeft = Math.min(window.innerWidth - nextBtn.offsetWidth - 8, rect.right + gap);
+      prevBtn.style.left = prevLeft + 'px';
+      nextBtn.style.left = nextLeft + 'px';
+    };
+    positionArrows();
+    window.addEventListener('resize', positionArrows);
+
+    if ('IntersectionObserver' in window && workSection) {
+      const arrowVisibility = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          prevBtn.classList.toggle('is-visible', entry.isIntersecting);
+          nextBtn.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      }, { threshold: 0 });
+      arrowVisibility.observe(workSection);
+    } else {
+      prevBtn.classList.add('is-visible');
+      nextBtn.classList.add('is-visible');
+    }
 
     let resizeTimer = null;
     window.addEventListener('resize', () => {
@@ -379,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const label = document.getElementById('arcaneSwapLabel');
     let showingA = true;
 
-    arcaneSwap.addEventListener('click', () => {
+    function performArcaneSwap() {
       const from = showingA ? videoA : videoB;
       const to = showingA ? videoB : videoA;
 
@@ -388,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
       from.classList.remove('is-active');
       from.classList.add('is-leaving');
 
-      requestAnimationFrame(() => { to.classList.add('is-active'); });
+      requestAnimationFrame(() => { to.classList.add('is-active'); to.play().catch(() => {}); });
 
       window.setTimeout(() => {
         from.hidden = true;
@@ -399,7 +444,11 @@ document.addEventListener('DOMContentLoaded', () => {
       showingA = !showingA;
       tag.textContent = showingA ? 'Final Scene' : 'Project File';
       label.textContent = showingA ? 'Switch to Project File' : 'Switch to Final Scene';
-    });
+    }
+
+    arcaneSwap.addEventListener('click', performArcaneSwap);
+    videoA.addEventListener('ended', performArcaneSwap);
+    videoB.addEventListener('ended', performArcaneSwap);
   }
 
   /* ------------------------------------------------------------
@@ -484,10 +533,10 @@ document.addEventListener('DOMContentLoaded', () => {
     faderEl.addEventListener('pointerdown', (e) => {
       dragging = true;
       fill.classList.add('no-anim'); thumb.classList.add('no-anim');
-      try { faderEl.setPointerCapture(e.pointerId); } catch (err) {}
       switchState(indexFromClientX(e.clientX));
+      e.preventDefault();
     });
-    faderEl.addEventListener('pointermove', (e) => {
+    window.addEventListener('pointermove', (e) => {
       if (!dragging) return;
       switchState(indexFromClientX(e.clientX));
     });
@@ -496,8 +545,8 @@ document.addEventListener('DOMContentLoaded', () => {
       dragging = false;
       fill.classList.remove('no-anim'); thumb.classList.remove('no-anim');
     };
-    faderEl.addEventListener('pointerup', endDrag);
-    faderEl.addEventListener('pointercancel', endDrag);
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
 
     faderEl.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { switchState(Math.min(activeIndex + 1, MUSIC_STATES.length - 1)); e.preventDefault(); }
