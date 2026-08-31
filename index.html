@@ -6,7 +6,7 @@
 <title>Matt Warner — Audio Designer</title>
 <meta name="description" content="Matt Warner — audio designer for video games. Sound design, implementation, and adaptive music.">
 
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23161A1F'/%3E%3Crect x='7' y='13' width='3' height='6' rx='1.5' fill='%23FDFCFA'/%3E%3Crect x='14.5' y='8' width='3' height='16' rx='1.5' fill='%2393BFD9'/%3E%3Crect x='22' y='11' width='3' height='10' rx='1.5' fill='%23FDFCFA'/%3E%3C/svg%3E">
+<link rel="icon" href="assets/favicon.png" type="image/png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -380,8 +380,28 @@
           </div>
         </article>
 
-        <!-- ============ SLIDE 3 : ORIGINAL MUSIC (Audio tab only) ============ -->
+        <!-- ============ SLIDE 3 : WALL-E SOUND RE-DESIGN (Audio tab only) ============ -->
         <article class="slide" data-index="2" data-mode="audio">
+          <div class="console">
+            <div class="console__media console__media--player">
+              <video class="console__video is-active" controls playsinline preload="metadata">
+                <source src="assets/video/walle-sound-redesign.mp4" type="video/mp4">
+              </video>
+              <span class="console__media-tag">Sound Redesign</span>
+            </div>
+            <div class="console__body">
+              <div class="console__title-row">
+                <h2 class="console__title">Wall-E Sound Re-Design</h2>
+                <span class="console__year">2022</span>
+              </div>
+              <p class="console__desc">While taking Music Industry Arts, we were tasked with doing a sound redesign for a scene from the film Wall-E. All sounds were recorded and synthesized by me, and the mix was done in Pro Tools.</p>
+              <p class="console__desc">Yes I know he doesn't talk in the movie.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ============ SLIDE 4 : ORIGINAL MUSIC (Audio tab only) ============ -->
+        <article class="slide" data-index="3" data-mode="audio">
           <div class="console">
             <div class="console__body">
               <div class="console__title-row">
@@ -397,18 +417,22 @@
                 <div class="streaming__embed">
                   <iframe src="https://open.spotify.com/embed/artist/1xlcv6ZdoiTk5F6H9MruxE?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Matt.Clip on Spotify"></iframe>
                 </div>
-                <div class="streaming__links">
-                  <a href="#" target="_blank" rel="noopener">Apple Music</a>
-                  <a href="#" target="_blank" rel="noopener">YouTube Music</a>
-                  <a href="#" target="_blank" rel="noopener">SoundCloud</a>
+                <div class="streaming__embed">
+                  <iframe src="https://embed.music.apple.com/us/artist/matt-clip/1728071031" width="100%" height="150" frameborder="0" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" loading="lazy" title="Matt.Clip on Apple Music"></iframe>
+                </div>
+                <div class="streaming__embed">
+                  <iframe src="https://www.youtube.com/embed/videoseries?list=UUeWC66EguFWDo_dvjYwfDmg" width="100%" height="200" frameborder="0" allow="autoplay; encrypted-media" loading="lazy" title="Matt.Clip on YouTube Music"></iframe>
+                </div>
+                <div class="streaming__embed">
+                  <iframe src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fmattclip&color=%23161a1f&auto_play=false&show_user=true" width="100%" height="166" frameborder="0" loading="lazy" title="Matt.Clip on SoundCloud"></iframe>
                 </div>
               </div>
             </div>
           </div>
         </article>
 
-        <!-- ============ SLIDE 4 : SHOWREEL (Art tab only) ============ -->
-        <article class="slide" data-index="3" data-mode="art">
+        <!-- ============ SLIDE 5 : SHOWREEL (Art tab only) ============ -->
+        <article class="slide" data-index="4" data-mode="art">
           <div class="console">
             <div class="console__media console__media--player">
               <video class="console__video is-active" id="showreelVideo" controls playsinline preload="metadata">
@@ -449,7 +473,7 @@
   <div class="about__inner">
 
     <div class="about__intro">
-      <p class="section-eyebrow">About</p>
+      <p class="section-eyebrow section-eyebrow--inverse">About</p>
       <h2 class="about__heading">Hi 👋, I'm Matt Warner, a <span id="aboutRoleWord">Sound Designer</span> from Ottawa, Ontario</h2>
       <img class="about__photo" src="assets/images/matt-warner-photo.jpg" alt="Matt Warner">
       <p class="about__bio">
@@ -478,8 +502,8 @@
     </div>
 
     <div class="about__games">
-      <p class="section-eyebrow">Favourite Games</p>
-      <p class="about__games-note">Outer Wilds is always going to be #1 — and for sound design specifically, nothing beats Return of the Obra Dinn.</p>
+      <p class="section-eyebrow section-eyebrow--inverse">Favourite Games</p>
+      <p class="about__games-note">My favourite games currently are Outer Wilds (always going to be #1), Counter-Strike 2, Celeste, Blue Prince, and The Binding of Isaac. When it comes to sound design, Return of the Obra Dinn is probably my favourite, however. I also have a ton of hours in League of Legends, but it makes me mad, so it's an honorary mention.</p>
       <ul class="chips">
         <li class="chip">Outer Wilds</li>
         <li class="chip">Counter-Strike 2</li>
@@ -492,7 +516,7 @@
     </div>
 
     <div class="about__skills">
-      <p class="section-eyebrow">Skills</p>
+      <p class="section-eyebrow section-eyebrow--inverse">Skills</p>
       <ul class="chips">
         <li class="chip chip--audio">Wwise</li>
         <li class="chip chip--audio">Sound Design</li>
@@ -522,7 +546,7 @@
     </div>
 
     <div class="about__history">
-      <p class="section-eyebrow">History</p>
+      <p class="section-eyebrow section-eyebrow--inverse">History</p>
       <ul class="log">
         <li class="log__row">
           <span class="log__time">Present</span>
@@ -552,6 +576,13 @@
             <p class="log__place">Encore Global</p>
           </div>
         </li>
+        <li class="log__row">
+          <span class="log__time">May 2021</span>
+          <div class="log__text">
+            <p class="log__role">Foundations of VFX</p>
+            <p class="log__place">GC Spectrum - College of Digital Art and Animation</p>
+          </div>
+        </li>
       </ul>
       <a class="resume-link" href="assets/resume/matt-warner-resume.pdf" download>
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
@@ -567,13 +598,16 @@
      ============================================================ -->
 <footer class="footer" id="contact">
   <div class="footer__inner">
-    <p class="section-eyebrow section-eyebrow--inverse">Get in touch</p>
-    <h2 class="footer__heading">Contact Information:</h2>
+    <p class="section-eyebrow section-eyebrow--inverse">Contact Information</p>
+    <h2 class="footer__heading">Let's work together!</h2>
     <a class="footer__email" href="mailto:matthewfw@live.com">matthewfw@live.com</a>
 
     <div class="footer__links">
       <a href="https://www.linkedin.com/in/matt-warner-3b6315198/" target="_blank" rel="noopener">LinkedIn</a>
       <a href="https://open.spotify.com/artist/1xlcv6ZdoiTk5F6H9MruxE" target="_blank" rel="noopener">Spotify</a>
+      <a href="https://music.apple.com/us/artist/matt-clip/1728071031" target="_blank" rel="noopener">Apple Music</a>
+      <a href="https://music.youtube.com/channel/UCeWC66EguFWDo_dvjYwfDmg" target="_blank" rel="noopener">YouTube Music</a>
+      <a href="https://soundcloud.com/mattclip" target="_blank" rel="noopener">SoundCloud</a>
     </div>
 
     <p class="footer__copy">© <span id="year"></span> Matt Warner.</p>

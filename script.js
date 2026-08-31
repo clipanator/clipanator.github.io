@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return d.trim();
   }
   document.querySelectorAll('.hero__wave').forEach((wave, idx) => {
-    const segment = 800, height = 34;
+    const segment = 800, height = 46;
     const d = buildHeroWavePath(segment * 2, height, 220, idx + 1);
     wave.innerHTML = `<svg class="hero__wave-svg" viewBox="0 0 ${segment * 2} ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>`;
   });
@@ -349,11 +349,20 @@ document.addEventListener('DOMContentLoaded', () => {
       updateViewportHeight();
     };
 
-    // Navigation loops: past the last slide wraps to the first, and vice versa.
+    const scrollToShowcaseTop = () => {
+      if (!workSection) return;
+      const targetY = workSection.getBoundingClientRect().top + window.scrollY;
+      smoothScrollTo(targetY, 600);
+    };
+
+    // Navigation jumps straight to the target slide (no sliding animation)
+    // and loops past either end; the page also scrolls back to the top of
+    // the section so a shorter/taller slide always starts in view.
     const goTo = (index) => {
       const count = visible.length;
       current = ((index % count) + count) % count;
       applyPosition();
+      scrollToShowcaseTop();
     };
 
     refreshCarousel = () => {
@@ -367,9 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
     prevBtn.addEventListener('click', () => goTo(current - 1));
     nextBtn.addEventListener('click', () => goTo(current + 1));
 
-    // Arrows float fixed in the viewport (vertically centered) so they never
-    // get lost while scrolling through a tall slide, but stay horizontally
-    // confined just outside/inside the carousel block's own edges.
+    // Arrows float fixed in the viewport so they never get lost while
+    // scrolling a tall slide, but are clamped so they never appear above
+    // or below the carousel block itself, and stay just outside its edges
+    // horizontally.
     const positionArrows = () => {
       if (!carouselEl) return;
       const rect = carouselEl.getBoundingClientRect();
@@ -378,9 +388,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const nextLeft = Math.min(window.innerWidth - nextBtn.offsetWidth - 8, rect.right + gap);
       prevBtn.style.left = prevLeft + 'px';
       nextBtn.style.left = nextLeft + 'px';
+
+      const halfH = prevBtn.offsetHeight / 2;
+      let centerY;
+      if (rect.bottom - rect.top <= prevBtn.offsetHeight) {
+        centerY = (rect.top + rect.bottom) / 2;
+      } else {
+        centerY = Math.min(Math.max(window.innerHeight / 2, rect.top + halfH), rect.bottom - halfH);
+      }
+      prevBtn.style.top = centerY + 'px';
+      nextBtn.style.top = centerY + 'px';
     };
     positionArrows();
+
+    let arrowRaf = null;
+    const scheduleArrowPosition = () => {
+      if (arrowRaf) return;
+      arrowRaf = requestAnimationFrame(() => { positionArrows(); arrowRaf = null; });
+    };
     window.addEventListener('resize', positionArrows);
+    window.addEventListener('scroll', scheduleArrowPosition, { passive: true });
 
     if ('IntersectionObserver' in window && workSection) {
       const arrowVisibility = new IntersectionObserver((entries) => {
@@ -409,6 +436,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     refreshCarousel();
+  }
+
+  /* ------------------------------------------------------------
+     Pause any content video with real controls once it scrolls
+     out of view, so audio doesn't keep playing unseen.
+     ------------------------------------------------------------ */
+  if ('IntersectionObserver' in window) {
+    const pauseOffscreen = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (!entry.isIntersecting) entry.target.pause(); });
+    }, { threshold: 0 });
+    document.querySelectorAll('video[controls]').forEach(v => pauseOffscreen.observe(v));
   }
 
   /* ------------------------------------------------------------

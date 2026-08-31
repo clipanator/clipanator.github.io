@@ -106,10 +106,10 @@ p { margin: 0; }
   right: 1.25rem;
   z-index: 40;
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.9rem 0.7rem;
+  gap: 0.55rem;
+  padding: 0.6rem 1rem;
   border-radius: 999px;
   background: var(--ink);
   color: var(--white);
@@ -117,39 +117,50 @@ p { margin: 0; }
 }
 .master-volume__slider-wrap {
   position: relative;
-  width: 20px;
-  height: 90px;
+  width: 90px;
+  height: 20px;
+  display: flex;
+  align-items: center;
 }
 .master-volume input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 90px;
-  height: 20px;
+  width: 100%;
+  height: 3px;
   margin: 0;
-  transform: translate(-50%, -50%) rotate(-90deg);
   border-radius: 999px;
   background: rgba(253, 252, 250, 0.28);
 }
 .master-volume input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 15px; height: 15px; border-radius: 50%;
+  width: 13px; height: 13px; border-radius: 50%;
   background: var(--white);
   cursor: pointer;
-  margin-top: -5.5px;
+  margin-top: -5px;
 }
 .master-volume input[type="range"]::-moz-range-thumb {
-  width: 15px; height: 15px; border-radius: 50%;
+  width: 13px; height: 13px; border-radius: 50%;
   background: var(--white); border: none; cursor: pointer;
 }
 
+/* On mobile, the slider flips to vertical — easier to reach and drag
+   with a thumb near the corner of the screen. */
 @media (max-width: 600px) {
   .floating-resume span { display: none; }
   .floating-resume { padding: 0.6rem; }
-  .master-volume__slider-wrap { height: 64px; }
-  .master-volume input[type="range"] { width: 64px; }
+
+  .master-volume { flex-direction: column; padding: 0.9rem 0.7rem; gap: 0.7rem; }
+  .master-volume__slider-wrap { width: 20px; height: 80px; }
+  .master-volume input[type="range"] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 20px;
+    transform: translate(-50%, -50%) rotate(-90deg);
+  }
+  .master-volume input[type="range"]::-webkit-slider-thumb { width: 15px; height: 15px; margin-top: -5.5px; }
+  .master-volume input[type="range"]::-moz-range-thumb { width: 15px; height: 15px; }
 }
 
 /* ==========================================================================
@@ -233,11 +244,12 @@ p { margin: 0; }
   min-height: 1.4em;
 }
 
-/* animated wave spanning from the screen edge into the name */
+/* animated wave spanning from the screen edge into the name, taller and
+   fuller near the text, tapering off toward the screen edge */
 .hero__wave {
   flex: 1 1 auto;
   min-width: 0;
-  height: 34px;
+  height: 46px;
   overflow: hidden;
   color: var(--white);
 }
@@ -247,12 +259,20 @@ p { margin: 0; }
   height: 100%;
   animation: waveScroll 7s linear infinite;
 }
+.hero__namerow .hero__wave:first-child {
+  -webkit-mask-image: linear-gradient(to left, black 0%, black 45%, transparent 100%);
+  mask-image: linear-gradient(to left, black 0%, black 45%, transparent 100%);
+}
+.hero__namerow .hero__wave:last-child {
+  -webkit-mask-image: linear-gradient(to right, black 0%, black 45%, transparent 100%);
+  mask-image: linear-gradient(to right, black 0%, black 45%, transparent 100%);
+}
 @keyframes waveScroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 @media (max-width: 480px) {
-  .hero__wave { height: 22px; }
+  .hero__wave { height: 30px; }
 }
 
 /* ---- scroll cue: upside-down dome flush with the hero's bottom edge ---- */
@@ -354,7 +374,6 @@ p { margin: 0; }
 .carousel__track {
   display: flex;
   align-items: flex-start;
-  transition: transform 0.5s var(--ease);
 }
 .slide {
   flex: 0 0 100%;
@@ -363,8 +382,8 @@ p { margin: 0; }
 
 .carousel__arrow {
   position: fixed;
-  top: 50%;
-  left: -100px; /* real left is set by JS once measured; keeps it off-screen until then */
+  top: -100px; /* real top/left set by JS once measured; keeps it off-screen until then */
+  left: -100px;
   transform: translateY(-50%);
   z-index: 15;
   flex: 0 0 auto;
@@ -695,7 +714,7 @@ p { margin: 0; }
 .sfx__desc { margin-top: 0.55rem; font-size: 0.86rem; color: var(--ink-soft); }
 
 /* ---- streaming embeds (Original Music) ---- */
-.streaming { margin-top: 1.8rem; max-width: 640px; }
+.streaming { margin-top: 1.8rem; max-width: 640px; display: flex; flex-direction: column; gap: 0.9rem; }
 .streaming__label {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -706,22 +725,6 @@ p { margin: 0; }
 }
 .streaming__embed { border-radius: var(--radius-md); overflow: hidden; }
 .streaming__embed iframe { display: block; border: none; }
-.streaming__links {
-  margin-top: 0.9rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-.streaming__links a {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  padding: 0.55rem 0.95rem;
-  border-radius: 999px;
-  border: 1px solid rgba(22, 26, 31, 0.25);
-  color: var(--ink);
-  transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
-}
-.streaming__links a:hover { border-color: var(--ink); background: rgba(22, 26, 31, 0.05); }
 
 /* ---- wwise session clip ---- */
 .wwise-session {
